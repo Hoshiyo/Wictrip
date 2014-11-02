@@ -11,5 +11,38 @@
     <string name="action_settings">Settings</string>
     <string name="create_album">Create Album</string>
     <string name="warning_album_name_empty">The album name cannot be empty</string>
+    <string name="lookSearch">Enter Search</string>
+    <string name="add">+</string>
+    <string name="open_menu">Open</string>
+    <string name="close_menu">Close</string>
+    <string name="menu">menu</string>
+
+    <!-- Nav Drawer Menu Items -->
+    <string-array name="nav_drawer_items">
+        <item >PLACES</item>
+        <item >Already visited</item>
+        <item >To go</item>
+        <item >Visualisation</item>
+
+        <item >ALBUMS</item>
+        <item >Create</item>
+        <item >Visualisation</item>
+
+        <item >FRIENDS</item>
+
+        <item >PARAMETERS</item>
+    </string-array>
+
+    <!-- Nav Drawer List Item Icons -->
+    <array name="nav_drawer_icons">
+        <item>@drawable/ic_album</item>
+        <item>@drawable/ic_album</item>
+
+        <item>@drawable/ic_album</item>
+    </array>
+
+    <!-- Content Description -->
+    <string name="desc_list_item_icon">Item Icon</string>
+>>>>>>> 1c311582ded8e75e6571c93ceb7a098868c0c5dd
 
 </resources>
