@@ -3,5 +3,13 @@
 
     <string name="app_name">Wictrip</string>
     <string name="title_activity_maps">Map</string>
+    <string name="enter_album_name">Enter the album name</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="title_activity_album">AlbumActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="create_album">Create Album</string>
+    <string name="warning_album_name_empty">The album name cannot be empty</string>
 
 </resources>
