@@ -4,10 +4,12 @@ import android.net.Uri;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
+
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 30/10/2014.
  */
-public class Picture {
+public class Picture  implements Serializable {
     int id = -1;
     private Uri uri = null;
     private String countryCode = null;

@@ -2,6 +2,7 @@ package com.example.hoshiyo.wictrip.entity;
 
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -9,7 +10,7 @@ import java.util.Collection;
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
  */
-public class Album {
+public class Album  implements Serializable {
     private static final String TAG = "Album";
     int id = -1;
     String name = null; // Album name
@@ -51,5 +52,10 @@ public class Album {
 
     public Place getPlace() {
         return place;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

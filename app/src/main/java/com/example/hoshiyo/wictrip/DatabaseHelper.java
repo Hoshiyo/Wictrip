@@ -13,6 +13,7 @@ import com.example.hoshiyo.wictrip.entity.Picture;
 import com.example.hoshiyo.wictrip.entity.Place;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 /**
@@ -22,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DB helper";
 
     private static final String DATABASE_NAME = "wicktrip.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 7;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -74,11 +75,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d(TAG, "Albums");
         Collection<Object> albums = AlbumDao.getInstance().getAll();
         Album album;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         for (Object obj : albums) {
             album = (Album) obj;
             Log.d(TAG, "Id: " + album.getId() + " Name: " + album.getName()
-                    + " dateBegin: " + album.getDateBegin() + " dateEnd: "
-                    + album.getDateEnd() + " Place: " + album.getPlace().getId());
+                    + " dateBegin: " + format.format(album.getDateBegin().getTime())
+                    + " dateEnd: " + format.format(album.getDateEnd().getTime())
+                    + " Place: " + album.getPlace().getId());
         }
     }
 }

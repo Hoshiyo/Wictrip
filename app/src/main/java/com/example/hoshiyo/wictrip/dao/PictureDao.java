@@ -3,9 +3,9 @@ package com.example.hoshiyo.wictrip.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import com.example.hoshiyo.wictrip.DatabaseHelper;
 import com.example.hoshiyo.wictrip.entity.Picture;
@@ -14,12 +14,13 @@ import com.google.android.gms.maps.model.LatLng;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 30/10/2014.
  */
 public class PictureDao implements IDao {
+    private static final String TAG = "Picture Dao";
+
     public static final String TABLE_NAME = "picture";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_URI = "uri";
@@ -65,21 +66,17 @@ public class PictureDao implements IDao {
     public void init(Context context) throws SQLException {
         dbHelper = new DatabaseHelper(context);
         db = dbHelper.getWritableDatabase();
+        fetchAll();
     }
 
     @Override
     public Picture create(Object obj) {
         Picture picture = (Picture) obj;
-        LatLng position = picture.getPosition();
+        if (exist(obj))
+            return picture;
 
         // Add new picture to DB
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_URI, picture.getUri().toString());
-        values.put(COLUMN_COUNTRY_CODE, picture.getCountryCode());
-        values.put(COLUMN_POSTAL_CODE, picture.getPostalCode());
-        values.put(COLUMN_LAT, position.latitude);
-        values.put(COLUMN_LNG, position.longitude);
-        values.put(COLUMN_DATE_TAKEN, picture.getDateTaken());
+        ContentValues values = pictureToContentValues(picture);
         long insertId = db.insert(TABLE_NAME, null, values);
 
         // Query the new picture created
@@ -114,9 +111,6 @@ public class PictureDao implements IDao {
      */
     @Override
     public Collection<Object> getAll() {
-        if(pictures == null) {
-            fetchAll();
-        }
         return pictures;
     }
 
@@ -127,14 +121,41 @@ public class PictureDao implements IDao {
 
     @Override
     public Object update(Object obj) {
+        Picture picture = (Picture) obj;
+        ContentValues values = pictureToContentValues(picture);
+        db.update(TABLE_NAME, values, COLUMN_ID + "=" + picture.getId(), null);
+
+        Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + picture.getId(), null, null, null, null);
+        Picture updatedPicture = cursorToPicture(cursor);
+        cursor.close();
+
+        return updatedPicture;
+    }
+
+    @Override
+    public Object delete(Object obj) {
+        Picture picture = (Picture) obj;
+        db.delete(TABLE_NAME, COLUMN_ID + "=" + picture.getId(), null);
 
         return obj;
     }
 
     @Override
-    public Object delete(Object obj) {
+    public boolean exist(Object obj) {
+        Picture picture = (Picture) obj;
+        String[] columns = {COLUMN_ID};
+        String[] whereValues = {picture.getUri().toString()};
+        Cursor cursor = db.query(TABLE_NAME, columns,
+                COLUMN_URI + "=?", whereValues, null, null, null);
 
-        return obj;
+        int count = cursor.getCount();
+        cursor.close();
+
+        Log.d(TAG, "Picture already exist: " + count);
+        if (count >= 1)
+            return true;
+
+        return false;
     }
 
     private Picture cursorToPicture(Cursor cursor) {
@@ -150,29 +171,46 @@ public class PictureDao implements IDao {
 
     /**
      * Check if the picture is already in the DB
+     *
      * @param uri picture uri
      * @return Boolean if the picture is already in the DB
      */
     public boolean exist(Uri uri) {
         String[] columns = {COLUMN_ID};
+        String[] whereValues = {uri.toString()};
         Cursor cursor = db.query(TABLE_NAME, columns,
-                COLUMN_URI + "=" + DatabaseUtils.sqlEscapeString(uri.toString()),
-                null, null, null, null);
-
+                COLUMN_URI + "=?", whereValues, null, null, null);
         int nbResult = cursor.getCount();
         cursor.close();
-        if(nbResult == 0)
-            return  false;
+
+        if (nbResult == 0)
+            return false;
 
         return true;
     }
 
     public Picture getPictureByUri(String uri) {
-        for(Object picture : pictures) {
-            if(((Picture) picture).getUri().equals(uri))
-                return (Picture) picture;
+        Picture picture = null;
+        for (Object obj : pictures) {
+            picture = (Picture) obj;
+            if (picture.getUri().toString().equals(uri))
+                return picture;
         }
 
-        return null;
+        return picture;
+    }
+
+    private ContentValues pictureToContentValues(Picture picture) {
+        ContentValues values = new ContentValues();
+        LatLng position = picture.getPosition();
+
+        values.put(COLUMN_URI, picture.getUri().toString());
+        values.put(COLUMN_COUNTRY_CODE, picture.getCountryCode());
+        values.put(COLUMN_POSTAL_CODE, picture.getPostalCode());
+        values.put(COLUMN_LAT, position.latitude);
+        values.put(COLUMN_LNG, position.longitude);
+        values.put(COLUMN_DATE_TAKEN, picture.getDateTaken());
+
+        return values;
     }
 }

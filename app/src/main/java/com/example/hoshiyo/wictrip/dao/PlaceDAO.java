@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.hoshiyo.wictrip.DatabaseHelper;
 import com.example.hoshiyo.wictrip.entity.Place;
@@ -18,6 +19,7 @@ import java.util.Collection;
  */
 public class PlaceDao implements IDao {
 
+    private static final String TAG = "Place Dao";
     public static final String TABLE_NAME = "place";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_COUNTRY_NAME = "country_name";
@@ -63,24 +65,20 @@ public class PlaceDao implements IDao {
     public void init(Context context) throws SQLException {
         dbHelper = new DatabaseHelper(context);
         db = dbHelper.getWritableDatabase();
+        fetchAll();
     }
 
     @Override
-    public Object create(Object obj) {
+    public Place create(Object obj) {
         Place place = (Place) obj;
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_COUNTRY_NAME, place.getCountryName());
-        contentValues.put(COLUMN_COUNTRY_CODE, place.getCountryCode());
-        contentValues.put(COLUMN_LOCALITY, place.getLocality());
-        contentValues.put(COLUMN_POSTAL_CODE, place.getPostalCode());
-        LatLng position = place.getPosition();
-        contentValues.put(COLUMN_LAT, position.latitude);
-        contentValues.put(COLUMN_LNG, position.longitude);
+        if(exist(obj))
+            return place;
 
-        long insertId = db.insert(TABLE_NAME, null, contentValues);
+        ContentValues values = placeToContentValues(place);
+        long insertId = db.insert(TABLE_NAME, null, values);
         Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + insertId, null, null, null, null);
         cursor.moveToFirst();
-        Place newPlace = (Place) cursorToPlace(cursor);
+        Place newPlace = cursorToPlace(cursor);
         cursor.close();
 
         return newPlace;
@@ -103,45 +101,67 @@ public class PlaceDao implements IDao {
     }
 
     /**
-     *
      * @return Get all Place
      */
     @Override
     public Collection<Object> getAll() {
-        if(places == null) {
-            fetchAll();
-        }
         return places;
     }
 
     @Override
-    public Object getItemById(int id) {
-        if(places == null) {
-            fetchAll();
-        }
-
+    public Place getItemById(int id) {
         Place place;
-        for(Object obj : places) {
+        for (Object obj : places) {
             place = (Place) obj;
 
-            if(place.getId() == id)
-                return obj;
+            if (place.getId() == id)
+                return place;
         }
 
         return null;
     }
 
     @Override
-    public Object update(Object obj) {
-        return null;
+    public Place update(Object obj) {
+        Place place = (Place) obj;
+        ContentValues values = placeToContentValues(place);
+        db.update(TABLE_NAME, values, COLUMN_ID + "=" + place.getId(), null);
+
+        Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + place.getId(), null, null, null, null);
+        Place updatedPlace = cursorToPlace(cursor);
+        cursor.close();
+
+        return updatedPlace;
     }
 
     @Override
     public Object delete(Object obj) {
-        return null;
+        Place place = (Place) obj;
+        db.delete(TABLE_NAME, COLUMN_ID + "=" + place.getId(), null);
+
+        return obj;
     }
 
-    private Object cursorToPlace(Cursor cursor) {
+    @Override
+    public boolean exist(Object obj) {
+        Place place = (Place) obj;
+        String[] columns = {COLUMN_ID};
+        String[] whereValues = {place.getCountryCode(), place.getPostalCode()};
+        Cursor cursor = db.query(TABLE_NAME, columns,
+                COLUMN_COUNTRY_CODE + "=?"
+                        + " and " + COLUMN_POSTAL_CODE + "=?", whereValues, null, null, null);
+
+        int count = cursor.getCount();
+        cursor.close();
+
+        Log.d(TAG, "Place already exist: " + count);
+        if(count >= 1)
+            return true;
+
+        return false;
+    }
+
+    private Place cursorToPlace(Cursor cursor) {
         int id = cursor.getInt(0);
         String countryName = cursor.getString(1);
         String countryCode = cursor.getString(2);
@@ -150,5 +170,19 @@ public class PlaceDao implements IDao {
         LatLng position = new LatLng(cursor.getDouble(5), cursor.getDouble(6));
 
         return new Place(id, countryName, countryCode, locality, postalCode, position);
+    }
+
+    private ContentValues placeToContentValues(Place place) {
+        ContentValues values = new ContentValues();
+        LatLng position = place.getPosition();
+
+        values.put(COLUMN_COUNTRY_NAME, place.getCountryName());
+        values.put(COLUMN_COUNTRY_CODE, place.getCountryCode());
+        values.put(COLUMN_LOCALITY, place.getLocality());
+        values.put(COLUMN_POSTAL_CODE, place.getPostalCode());
+        values.put(COLUMN_LAT, position.latitude);
+        values.put(COLUMN_LNG, position.longitude);
+
+        return values;
     }
 }

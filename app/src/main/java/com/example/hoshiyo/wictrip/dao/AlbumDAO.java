@@ -13,7 +13,6 @@ import com.example.hoshiyo.wictrip.entity.Place;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 
 /**
@@ -70,22 +69,21 @@ public class AlbumDao implements IDao {
         //TODO initiate mAlbums with a query to DB
     }
 
-    public void init(Context context)  throws SQLException {
+    public void init(Context context) throws SQLException {
         dbHelper = new DatabaseHelper(context);
         db = dbHelper.getWritableDatabase();
+        fetchAll();
     }
 
     @Override
-    public Object create(Object obj) {
+    public Album create(Object obj) {
         Album album = (Album) obj;
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_NAME, album.getName());
-        contentValues.put(COLUMN_PICTURES, PicturesToString(album));
-        contentValues.put(COLUMN_DATE_BEGIN, album.getDateBegin().getTimeInMillis());
-        contentValues.put(COLUMN_DATE_END, album.getDateEnd().getTimeInMillis());
-        contentValues.put(COLUMN_PLACE, album.getPlace().getId());
+        if (exist(obj))
+            return album;
 
-        long insertId = db.insert(TABLE_NAME, null, contentValues);
+        ContentValues values = albumToContentValues(album);
+        long insertId = db.insert(TABLE_NAME, null, values);
+
         Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + insertId, null, null, null, null);
         cursor.moveToFirst();
         Album newAlbum = (Album) cursorToAlbum(cursor);
@@ -95,13 +93,10 @@ public class AlbumDao implements IDao {
     }
 
     private void fetchAll() {
-        Log.d(TAG, "FETCH ALL");
         albums = new ArrayList<Object>();
 
         Cursor cursor = db.query(TABLE_NAME, allColumns, null, null, null, null, null);
         cursor.moveToFirst();
-
-        Log.d(TAG, "Count album: " + cursor.getCount());
 
         while (!cursor.isAfterLast()) {
             albums.add(cursorToAlbum(cursor));
@@ -112,40 +107,75 @@ public class AlbumDao implements IDao {
 
     @Override
     public Collection<Object> getAll() {
-        Log.d(TAG, "GET ALL");
-        if(albums == null) {
-            fetchAll();
-        }
-
         return albums;
     }
 
     @Override
-    public Object getItemById(int id) {
-        return null;
+    public Album getItemById(int id) {
+//        Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + id, null, null, null, null);
+//        cursor.moveToFirst();
+//        Album album = cursorToAlbum(cursor);
+//        cursor.close();
+
+        Album album = null;
+        for (Object obj : albums) {
+            album = (Album) obj;
+            if (album.getId() == id)
+                return album;
+        }
+        return album;
     }
 
     @Override
     public Object update(Object obj) {
-        return null;
+        Album album = (Album) obj;
+        ContentValues values = albumToContentValues(album);
+        db.update(TABLE_NAME, values, COLUMN_ID + "=" + album.getId(), null);
+
+        Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + album.getId(), null, null, null, null);
+        Album updatedAlbum = cursorToAlbum(cursor);
+        cursor.close();
+
+        return updatedAlbum;
     }
 
     @Override
     public Object delete(Object obj) {
-        return null;
+        Album album = (Album) obj;
+        db.delete(TABLE_NAME, COLUMN_ID + "=" + album.getId(), null);
+
+        return obj;
+    }
+
+    @Override
+    public boolean exist(Object obj) {
+        Album album = (Album) obj;
+        String[] columns = {COLUMN_ID};
+        String[] selectionArgs = {album.getName(), "" + album.getPlace().getId()};
+        Cursor cursor = db.query(TABLE_NAME, columns,
+                COLUMN_NAME + "=?" + " and " + COLUMN_PLACE + "=?",
+                selectionArgs, null, null, null);
+
+        int count = cursor.getCount();
+        cursor.close();
+
+        Log.d(TAG, "Place already exist: " + count);
+        if (count >= 1)
+            return true;
+
+        return false;
     }
 
     private Album cursorToAlbum(Cursor cursor) {
         int id = cursor.getInt(0);
         String name = cursor.getString(1);
         Collection<Picture> pictures = stringToPictures(cursor.getString(2));
+        Log.d(TAG, name + ": " + pictures.size());
 
         long timeBegin = cursor.getLong(3);
         long timeEnd = cursor.getLong(4);
 
         Place place = (Place) PlaceDao.getInstance().getItemById(cursor.getInt(5));
-
-        cursor.close();
 
         return new Album(id, name, pictures, timeBegin, timeEnd, place);
     }
@@ -170,9 +200,10 @@ public class AlbumDao implements IDao {
         Picture picture = null;
         String[] uriTab = picturesUri.split(URI_SEPARATOR);
 
-        for(String uri : uriTab) {
+        for (String uri : uriTab) {
             picture = pictureDao.getPictureByUri(uri);
-            if(picture == null) {
+            if (picture == null) {
+                Log.d(TAG, "Picture does not exist !");
                 // TODO delete Uri ?
                 continue;
             }
@@ -180,6 +211,19 @@ public class AlbumDao implements IDao {
             pictures.add(picture);
         }
 
+        Log.d(TAG, "Pictures: " + pictures.size());
+
         return pictures;
+    }
+
+    private ContentValues albumToContentValues(Album album) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, album.getName());
+        values.put(COLUMN_PICTURES, PicturesToString(album));
+        values.put(COLUMN_DATE_BEGIN, album.getDateBegin().getTimeInMillis());
+        values.put(COLUMN_DATE_END, album.getDateEnd().getTimeInMillis());
+        values.put(COLUMN_PLACE, album.getPlace().getId());
+
+        return values;
     }
 }

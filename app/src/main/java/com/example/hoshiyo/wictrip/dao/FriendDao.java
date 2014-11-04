@@ -39,4 +39,9 @@ public class FriendDao implements IDao {
     public Object delete(Object obj) {
         return null;
     }
+
+    @Override
+    public boolean exist(Object obj) {
+        return false;
+    }
 }

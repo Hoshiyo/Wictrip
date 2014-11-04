@@ -2,16 +2,18 @@ package com.example.hoshiyo.wictrip.entity;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
+
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
  */
-public class Place {
+public class Place implements Serializable {
     int id = -1;
-    private final String countryName;
-    private final String countryCode;
-    private final String locality;
-    private final String postalCode;
-    private final LatLng position;
+    private String countryName;
+    private String countryCode;
+    private String locality;
+    private String postalCode;
+    private LatLng position;
 
 
     public Place(int id, String countryName, String countryCode, String locality, String postalCode, LatLng position) {

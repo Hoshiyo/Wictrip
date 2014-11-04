@@ -25,6 +25,7 @@ public class Wictrip extends Application {
             PictureDao.getInstance().init(getApplicationContext());
             PlaceDao.getInstance().init(getApplicationContext());
             AlbumDao.getInstance().init(getApplicationContext());
+            Log.d(TAG, "initialized");
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.example.hoshiyo.wictrip.activity;
 
+import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.app.ActionBar;
@@ -14,17 +15,30 @@ import android.view.ViewGroup;
 import android.os.Build;
 
 import com.example.hoshiyo.wictrip.R;
+import com.example.hoshiyo.wictrip.dao.AlbumDao;
+import com.example.hoshiyo.wictrip.dao.PictureDao;
+import com.example.hoshiyo.wictrip.dao.PlaceDao;
+import com.example.hoshiyo.wictrip.entity.Album;
 import com.example.hoshiyo.wictrip.fragment.AlbumCreationFragment;
+import com.example.hoshiyo.wictrip.fragment.AlbumPictures;
 
-public class AlbumActivity extends FragmentActivity {
+public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnFragmentInteractionListener {
+
+    private static final String TAG = "Album Activity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album);
+
         if (savedInstanceState == null) {
+            Fragment fragment = new AlbumPictures();
+            Bundle bundle = new Bundle();
+            Album album = AlbumDao.getInstance().getItemById(2);
+            bundle.putSerializable(AlbumPictures.ARG_ALBUM, album);
+            fragment.setArguments(bundle);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new AlbumCreationFragment())
+                    .add(R.id.container, fragment, null)
                     .commit();
         }
     }
@@ -47,5 +61,10 @@ public class AlbumActivity extends FragmentActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        //TODO
     }
 }

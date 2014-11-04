@@ -54,11 +54,6 @@ public class AlbumCreationFragment extends Fragment {
 
         mName = (TextView) v.findViewById(R.id.album_name);
 
-        //TODO Supprimer
-//        PlaceDao.getInstance().create(new Place(-1, "Thailand", "TH", null, null, new LatLng(15.275766, 101.006706)));
-//        PlaceDao.getInstance().create(new Place(-1, "Thailand", "TH", "Bangkok", "10150", new LatLng(15.275766, 101.006706)));
-//        PlaceDao.getInstance().create(new Place(-1, "France", "FR", "Charenton-le-pont", "94220", new LatLng(48.821656, 2.413280)));
-
         DatabaseHelper.printDB();
 
         mPlaceSpinner = (Spinner) v.findViewById(R.id.places_spinner);

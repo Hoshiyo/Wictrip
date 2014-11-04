@@ -14,12 +14,12 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.example.hoshiyo.wictrip.dao.PictureDao;
+import com.example.hoshiyo.wictrip.dao.PlaceDao;
 import com.example.hoshiyo.wictrip.entity.Picture;
+import com.example.hoshiyo.wictrip.entity.Place;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ public class PictureService extends Service {
     /**
      * Reverse geocoding with all user pictures to get country, locality
      * Store the picture info into local db (date taken, uri and position)
-      */
+     */
     public void processUserPictures() throws IOException {
 
         // Get user pictures
@@ -62,86 +62,107 @@ public class PictureService extends Service {
 
         // merge all picture from these two storage
         Cursor mergeCursor = new MergeCursor(cursors);
-        String columnName[] = mergeCursor.getColumnNames();
-        mergeCursor.moveToFirst();
-
-
-        Collection<Uri> selectImgs = new ArrayList<Uri>();
 
         int dataColumnId = mergeCursor.getColumnIndex(MediaStore.Images.Media.DATA);
         int dateTakenColumnId = mergeCursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN);
         int lngColumnId = mergeCursor.getColumnIndex(MediaStore.Images.Media.LONGITUDE);
         int latColumnId = mergeCursor.getColumnIndex(MediaStore.Images.Media.LATITUDE);
 
+        PlaceDao placeDao = PlaceDao.getInstance();
         PictureDao pictureDao = PictureDao.getInstance();
         Picture picture;
         Uri uri;
-        String countryCode = "NONE", postalCode = "NONE";
+        String countryName = null, countryCode = null, locality = null, postalCode = null;
         LatLng position;
         double lng, lat;
         long dateTaken;
         float dist;
         List<Address> addresses;
-        Address address;
 
         Location currentLocation = new Location("");
         Location previousLocation = new Location("");
         previousLocation.setLatitude(0);
         previousLocation.setLongitude(0);
 
-        for (int i = 0, count = mergeCursor.getCount(); i < count; i++) {
+        mergeCursor.moveToFirst();
+        while (!mergeCursor.isAfterLast()) {
             uri = Uri.parse((mergeCursor.getString(dataColumnId)));
 
             // Picture already present in the DB
-            if(pictureDao.exist(uri)) {
-                Log.d(TAG, "Picture already in the DB");
-                continue;
-            }
+            if (!pictureDao.exist(uri)) {
+                dateTaken = mergeCursor.getLong(dateTakenColumnId);
 
-            dateTaken = mergeCursor.getLong(dateTakenColumnId);
+                // Get lat and lng in the picture meta data
+                lat = mergeCursor.getDouble(latColumnId);
+                lng = mergeCursor.getDouble(lngColumnId);
+                position = new LatLng(lat, lng);
 
-            // Get lat and lng in the picture meta data
-            lat = mergeCursor.getDouble(latColumnId);
-            lng = mergeCursor.getDouble(lngColumnId);
-            position = new LatLng(lat, lng);
+                // Geo tag available
+                if (lng != 0 && lat != 0) {
+                    currentLocation.setLatitude(lat);
+                    currentLocation.setLongitude(lng);
+                    dist = currentLocation.distanceTo(previousLocation);
 
-            // Geo tag available
-            if (lng != 0 && lat != 0) {
-                currentLocation.setLatitude(lat);
-                currentLocation.setLongitude(lng);
-                dist = currentLocation.distanceTo(previousLocation);
+                    if (dist > 1000) {
+                        addresses = mGeocoder.getFromLocation(lat, lng, 10);
+                        countryName = null;
+                        countryCode = null;
+                        locality = null;
+                        postalCode = null;
+                        // There is at least 1 address
+                        if (addresses.size() >= 1) {
+                            // Check addresses to get CountryCode and PostalCode
+                            for (Address address : addresses) {
+                                if (countryName == null)
+                                    countryName = address.getCountryName();
+                                if (countryCode == null)
+                                    countryCode = address.getCountryCode();
+                                if (locality == null)
+                                    locality = address.getLocality();
+                                if (postalCode == null)
+                                    postalCode = address.getPostalCode();
 
-                if (dist > 1000) {
-                    addresses = mGeocoder.getFromLocation(lat, lng, 1);
-                    if (addresses.size() == 1) {
-                        address = addresses.get(0);
-                        countryCode = address.getCountryCode();
-                        postalCode = address.getPostalCode();
+                                if (countryName != null && countryCode != null && locality != null && postalCode != null)
+                                    break;
+                            }
 
-                        Log.d(TAG, "Geolocalisable - country: " + countryCode + " Postal code: " + postalCode);
+                            placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, new LatLng(lat, lng)));
+                            Log.d(TAG, "Geolocalisable - country: " + countryCode + " Postal code: " + postalCode);
+                        }
+                        // Request to reverse geocoding has a limit time per sec
+                        SystemClock.sleep(GEOCODER_LIMIT_TIME_PER_SEC);
+
+                        previousLocation.setLatitude(lat);
+                        previousLocation.setLongitude(lng);
                     }
-                    SystemClock.sleep(GEOCODER_LIMIT_TIME_PER_SEC);
 
-                    previousLocation.setLatitude(lat);
-                    previousLocation.setLongitude(lng);
+                    picture = new Picture(-1, uri, countryCode, postalCode, position, dateTaken);
+                }
+                // No data to geo tag in the picture
+                else {
+                    picture = new Picture(-1, uri, null, null, position, dateTaken);
                 }
 
-                picture = new Picture(-1, uri, countryCode, postalCode, position, dateTaken);
+                Log.d(TAG, "New picture: " + uri + " " + position + " " + dateTaken);
+
+                // Add the picture object to DB
+                pictureDao.create(picture);
             }
-            // No data to geo tag in the picture
             else {
-                picture = new Picture(-1, uri, null, null, position, dateTaken);
+                Log.d(TAG, "Picture already in the DB");
             }
 
-            Log.d(TAG, "New picture: " + uri + " " + position + " " + dateTaken);
-
-            // Add the picture object to DB
-            pictureDao.create(picture);
             mergeCursor.moveToNext();
         }
 
-        cursors[0].close();
-        cursors[1].close();
+        cursors[0].
+
+                close();
+
+        cursors[1].
+
+                close();
+
         mergeCursor.close();
     }
 
