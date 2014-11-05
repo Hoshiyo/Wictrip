@@ -1,15 +1,23 @@
 package com.example.hoshiyo.wictrip.fragment;
 
+
+import android.app.ActionBar;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+
+
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.hoshiyo.adapter.PictureGridViewAdapter;
 import com.example.hoshiyo.wictrip.R;
@@ -61,6 +69,36 @@ public class AlbumPictures extends Fragment {
         if (getArguments() != null) {
             mAlbum = (Album) getArguments().getSerializable(ARG_ALBUM);
         }
+
+        // Create custom menu
+        ActionBar actionBar = getActivity().getActionBar();
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+
+        View menu = getActivity().getLayoutInflater().inflate(R.layout.menu_album_pictures, null);
+
+        TextView textView = (TextView) menu.findViewById(R.id.title);
+        textView.setText(mAlbum.getName());
+
+        ImageView imageView = (ImageView) menu.findViewById(R.id.item_add);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO
+            }
+        });
+
+        imageView = (ImageView) menu.findViewById(R.id.item_delete);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO
+            }
+        });
+
+        actionBar.setCustomView(menu);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
     }
 
     @Override

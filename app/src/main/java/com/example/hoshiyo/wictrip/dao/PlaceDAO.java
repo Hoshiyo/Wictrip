@@ -71,7 +71,7 @@ public class PlaceDao implements IDao {
     @Override
     public Place create(Object obj) {
         Place place = (Place) obj;
-        if(exist(obj))
+        if (exist(obj))
             return place;
 
         ContentValues values = placeToContentValues(place);
@@ -145,17 +145,22 @@ public class PlaceDao implements IDao {
     @Override
     public boolean exist(Object obj) {
         Place place = (Place) obj;
+        String postalCode = place.getPostalCode();
+        String query;
+        if (postalCode == null)
+            query = COLUMN_COUNTRY_CODE + "=?" + " and " + COLUMN_POSTAL_CODE + " is null";
+        else
+            query = COLUMN_COUNTRY_CODE + "=?" + " and " + COLUMN_POSTAL_CODE + "=?";
+
         String[] columns = {COLUMN_ID};
         String[] whereValues = {place.getCountryCode(), place.getPostalCode()};
-        Cursor cursor = db.query(TABLE_NAME, columns,
-                COLUMN_COUNTRY_CODE + "=?"
-                        + " and " + COLUMN_POSTAL_CODE + "=?", whereValues, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, columns, query, whereValues, null, null, null);
 
         int count = cursor.getCount();
         cursor.close();
 
         Log.d(TAG, "Place already exist: " + count);
-        if(count >= 1)
+        if (count >= 1)
             return true;
 
         return false;
