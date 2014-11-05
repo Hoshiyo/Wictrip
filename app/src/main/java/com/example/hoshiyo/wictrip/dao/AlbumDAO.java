@@ -133,6 +133,7 @@ public class AlbumDao implements IDao {
         db.update(TABLE_NAME, values, COLUMN_ID + "=" + album.getId(), null);
 
         Cursor cursor = db.query(TABLE_NAME, allColumns, COLUMN_ID + "=" + album.getId(), null, null, null, null);
+        cursor.moveToFirst();
         Album updatedAlbum = cursorToAlbum(cursor);
         cursor.close();
 
@@ -185,7 +186,7 @@ public class AlbumDao implements IDao {
         StringBuffer formattedPicturesUri = new StringBuffer();
         int len = pictures.size();
         for (Picture picture : pictures) {
-            formattedPicturesUri.append(picture.getUri().toString());
+            formattedPicturesUri.append(picture.getUri());
             formattedPicturesUri.append(URI_SEPARATOR);
         }
         formattedPicturesUri.deleteCharAt(formattedPicturesUri.length() - 1);
@@ -225,5 +226,15 @@ public class AlbumDao implements IDao {
         values.put(COLUMN_PLACE, album.getPlace().getId());
 
         return values;
+    }
+
+    public void addPicture(Album album, Picture picture) {
+        album.addPicture(picture);
+        update(album);
+    }
+
+    public void deletePicture(Album album, Picture picture) {
+        album.deletePicture(picture);
+        update(album);
     }
 }

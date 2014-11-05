@@ -172,21 +172,21 @@ public class PlaceDao implements IDao {
         String countryCode = cursor.getString(2);
         String locality = cursor.getString(3);
         String postalCode = cursor.getString(4);
-        LatLng position = new LatLng(cursor.getDouble(5), cursor.getDouble(6));
+        double lat = cursor.getDouble(5);
+        double lng = cursor.getDouble(6);
 
-        return new Place(id, countryName, countryCode, locality, postalCode, position);
+        return new Place(id, countryName, countryCode, locality, postalCode, lat, lng);
     }
 
     private ContentValues placeToContentValues(Place place) {
         ContentValues values = new ContentValues();
-        LatLng position = place.getPosition();
 
         values.put(COLUMN_COUNTRY_NAME, place.getCountryName());
         values.put(COLUMN_COUNTRY_CODE, place.getCountryCode());
         values.put(COLUMN_LOCALITY, place.getLocality());
         values.put(COLUMN_POSTAL_CODE, place.getPostalCode());
-        values.put(COLUMN_LAT, position.latitude);
-        values.put(COLUMN_LNG, position.longitude);
+        values.put(COLUMN_LAT, place.getLat());
+        values.put(COLUMN_LNG, place.getLng());
 
         return values;
     }

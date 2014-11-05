@@ -144,7 +144,7 @@ public class PictureDao implements IDao {
     public boolean exist(Object obj) {
         Picture picture = (Picture) obj;
         String[] columns = {COLUMN_ID};
-        String[] whereValues = {picture.getUri().toString()};
+        String[] whereValues = {picture.getUri()};
         Cursor cursor = db.query(TABLE_NAME, columns,
                 COLUMN_URI + "=?", whereValues, null, null, null);
 
@@ -158,26 +158,15 @@ public class PictureDao implements IDao {
         return false;
     }
 
-    private Picture cursorToPicture(Cursor cursor) {
-        int id = cursor.getInt(0);
-        Uri uri = Uri.parse(cursor.getString(1));
-        String countryCode = cursor.getString(2);
-        String postalCode = cursor.getString(3);
-        LatLng position = new LatLng(cursor.getDouble(4), cursor.getDouble(5));
-        long dateTaken = cursor.getLong(6);
-
-        return new Picture(id, uri, countryCode, postalCode, position, dateTaken);
-    }
-
     /**
      * Check if the picture is already in the DB
      *
      * @param uri picture uri
      * @return Boolean if the picture is already in the DB
      */
-    public boolean exist(Uri uri) {
+    public boolean uriExist(String uri) {
         String[] columns = {COLUMN_ID};
-        String[] whereValues = {uri.toString()};
+        String[] whereValues = {uri};
         Cursor cursor = db.query(TABLE_NAME, columns,
                 COLUMN_URI + "=?", whereValues, null, null, null);
         int nbResult = cursor.getCount();
@@ -189,26 +178,39 @@ public class PictureDao implements IDao {
         return true;
     }
 
+    private Picture cursorToPicture(Cursor cursor) {
+        int id = cursor.getInt(0);
+        String uri = cursor.getString(1);
+        String countryCode = cursor.getString(2);
+        String postalCode = cursor.getString(3);
+        double lat = cursor.getDouble(4);
+        double lng = cursor.getDouble(5);
+
+        long dateTaken = cursor.getLong(6);
+
+        return new Picture(id, uri, countryCode, postalCode, lat, lng, dateTaken);
+    }
+
     public Picture getPictureByUri(String uri) {
-        Picture picture = null;
+        Picture picture;
         for (Object obj : pictures) {
             picture = (Picture) obj;
-            if (picture.getUri().toString().equals(uri))
+            if (picture.getUri().equals(uri)) {
                 return picture;
+            }
         }
 
-        return picture;
+        return null;
     }
 
     private ContentValues pictureToContentValues(Picture picture) {
         ContentValues values = new ContentValues();
-        LatLng position = picture.getPosition();
 
-        values.put(COLUMN_URI, picture.getUri().toString());
+        values.put(COLUMN_URI, picture.getUri());
         values.put(COLUMN_COUNTRY_CODE, picture.getCountryCode());
         values.put(COLUMN_POSTAL_CODE, picture.getPostalCode());
-        values.put(COLUMN_LAT, position.latitude);
-        values.put(COLUMN_LNG, position.longitude);
+        values.put(COLUMN_LAT, picture.getLat());
+        values.put(COLUMN_LNG, picture.getLng());
         values.put(COLUMN_DATE_TAKEN, picture.getDateTaken());
 
         return values;

@@ -55,8 +55,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.d(TAG, "Id: " + picture.getId() + " Uri: " + picture.getUri()
                     + " CountryCode: " + picture.getCountryCode()
                     + " PostalCode: " + picture.getPostalCode() + " Lat: "
-                    + picture.getPosition().latitude + " Lng: "
-                    + picture.getPosition().longitude
+                    + picture.getLat() + " Lng: "
+                    + picture.getLng()
                     + " DateTaken: " + picture.getDateTaken());
         }
 
@@ -68,8 +68,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.d(TAG, "Id: " + place.getId() + " CountryName: " + place.getCountryName()
                     + " CountryCode: " + place.getCountryCode() + " Locality: "
                     + place.getLocality() + " PostalCode: " + place.getPostalCode()
-                    + " Lat: " + place.getPosition().latitude + " Lng: "
-                    + place.getPosition().longitude);
+                    + " Lat: " + place.getLat() + " Lng: "
+                    + place.getLng());
         }
 
         Log.d(TAG, "Albums");

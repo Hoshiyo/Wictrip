@@ -58,4 +58,12 @@ public class Album  implements Serializable {
     public String toString() {
         return name;
     }
+
+    public void deletePicture(Picture picture) {
+        pictures.remove(picture);
+    }
+
+    public void addPicture(Picture picture) {
+        pictures.add(picture);
+    }
 }

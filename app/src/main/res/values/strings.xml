@@ -39,7 +39,22 @@
 
     <!-- Content Description -->
     <string name="desc_list_item_icon">Item Icon</string>
->>>>>>> 1c311582ded8e75e6571c93ceb7a098868c0c5dd    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="action_menu_add_picture">Add picture</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="dialog_title_delete">Delete</string>
+    <string name="OK">OK</string>
+
+    <plurals name="dialog_really_delete">
+        <item quantity="one">Do you really want to delete this picture</item>
+        <item quantity="other">Do you really want to delete these pictures</item>
+    </plurals>
+
+    <plurals name="picture_selected">
+        <item quantity="zero">picture selected</item>
+        <item quantity="one">picture selected</item>
+        <item quantity="other">pictures selected</item>
+    </plurals>
 
 </resources>

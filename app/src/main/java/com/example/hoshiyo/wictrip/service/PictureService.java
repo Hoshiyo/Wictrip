@@ -7,7 +7,6 @@ import android.database.MergeCursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.Uri;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.MediaStore;
@@ -71,7 +70,7 @@ public class PictureService extends Service {
         PlaceDao placeDao = PlaceDao.getInstance();
         PictureDao pictureDao = PictureDao.getInstance();
         Picture picture;
-        Uri uri;
+        String uri;
         String countryName = null, countryCode = null, locality = null, postalCode = null;
         LatLng position;
         double lng, lat;
@@ -86,16 +85,15 @@ public class PictureService extends Service {
 
         mergeCursor.moveToFirst();
         while (!mergeCursor.isAfterLast()) {
-            uri = Uri.parse((mergeCursor.getString(dataColumnId)));
+            uri = mergeCursor.getString(dataColumnId);
 
             // Picture already present in the DB
-            if (!pictureDao.exist(uri)) {
+            if (!pictureDao.uriExist(uri)) {
                 dateTaken = mergeCursor.getLong(dateTakenColumnId);
 
                 // Get lat and lng in the picture meta data
                 lat = mergeCursor.getDouble(latColumnId);
                 lng = mergeCursor.getDouble(lngColumnId);
-                position = new LatLng(lat, lng);
 
                 // Geo tag available
                 if (lng != 0 && lat != 0) {
@@ -126,7 +124,7 @@ public class PictureService extends Service {
                                     break;
                             }
 
-                            placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, new LatLng(lat, lng)));
+                            placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, lat, lng));
                             Log.d(TAG, "Geolocalisable - country: " + countryCode + " Postal code: " + postalCode);
                         }
                         // Request to reverse geocoding has a limit time per sec
@@ -136,33 +134,26 @@ public class PictureService extends Service {
                         previousLocation.setLongitude(lng);
                     }
 
-                    picture = new Picture(-1, uri, countryCode, postalCode, position, dateTaken);
+                    picture = new Picture(-1, uri, countryCode, postalCode, lat, lng, dateTaken);
                 }
                 // No data to geo tag in the picture
                 else {
-                    picture = new Picture(-1, uri, null, null, position, dateTaken);
+                    picture = new Picture(-1, uri, null, null, lat, lng, dateTaken);
                 }
 
-                Log.d(TAG, "New picture: " + uri + " " + position + " " + dateTaken);
+                Log.d(TAG, "New picture: " + uri + " (" + lat + ", " + lng + ") " + dateTaken);
 
                 // Add the picture object to DB
                 pictureDao.create(picture);
-            }
-            else {
+            } else {
                 Log.d(TAG, "Picture already in the DB");
             }
 
             mergeCursor.moveToNext();
         }
 
-        cursors[0].
-
-                close();
-
-        cursors[1].
-
-                close();
-
+        cursors[0].close();
+        cursors[1].close();
         mergeCursor.close();
     }
 

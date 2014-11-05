@@ -1,12 +1,9 @@
 package com.example.hoshiyo;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
@@ -16,6 +13,12 @@ import java.lang.ref.WeakReference;
  * Created by Guillaume 'DarzuL' Bourderye on 04/11/2014.
  */
 public class BitmapDecoder {
+
+    public static int PICTURE_SIZE;
+
+    public static void init(int pictureSize) {
+        PICTURE_SIZE = pictureSize;
+    }
 
     private static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -56,11 +59,13 @@ public class BitmapDecoder {
     }
 
     public static void loadBitmap(String path, ImageView imageView) {
-        final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-        final AsyncDrawable asyncDrawable =
-                new AsyncDrawable(task);
-        imageView.setImageDrawable(asyncDrawable);
-        task.execute(path);
+        if (cancelPotentialWork(path, imageView)) {
+            final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+            final AsyncDrawable asyncDrawable =
+                    new AsyncDrawable(task);
+            imageView.setImageDrawable(asyncDrawable);
+            task.execute(path);
+        }
     }
 
     private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
@@ -74,13 +79,13 @@ public class BitmapDecoder {
         return null;
     }
 
-    public static boolean cancelPotentialWork(int data, ImageView imageView) {
+    public static boolean cancelPotentialWork(String path, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
 
         if (bitmapWorkerTask != null) {
-            final int bitmapData = bitmapWorkerTask.data;
+            final String bitmapPath = bitmapWorkerTask.path;
             // If bitmapData is not yet set or it differs from the new data
-            if (bitmapData == 0 || bitmapData != data) {
+            if (bitmapPath == null || !bitmapPath.equals(path)) {
                 // Cancel previous task
                 bitmapWorkerTask.cancel(true);
             } else {
@@ -94,7 +99,7 @@ public class BitmapDecoder {
 
     private static class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> imageViewReference;
-        private int data = 0;
+        private String path = null;
 
         public BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
@@ -105,7 +110,7 @@ public class BitmapDecoder {
         @Override
         protected Bitmap doInBackground(String... params) {
             String path = params[0];
-            return decodeSampledBitmapFromFile(path, 100, 100);
+            return decodeSampledBitmapFromFile(path, PICTURE_SIZE, PICTURE_SIZE);
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
@@ -115,7 +120,7 @@ public class BitmapDecoder {
                 bitmap = null;
             }
 
-            if (imageViewReference != null && bitmap != null) {
+            if (bitmap != null) {
                 final ImageView imageView = imageViewReference.get();
                 final BitmapWorkerTask bitmapWorkerTask =
                         getBitmapWorkerTask(imageView);

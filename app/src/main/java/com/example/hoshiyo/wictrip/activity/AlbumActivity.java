@@ -1,28 +1,20 @@
 package com.example.hoshiyo.wictrip.activity;
 
+import android.app.FragmentManager;
 import android.net.Uri;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.Fragment;
-import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
 
+import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.R;
 import com.example.hoshiyo.wictrip.dao.AlbumDao;
-import com.example.hoshiyo.wictrip.dao.PictureDao;
-import com.example.hoshiyo.wictrip.dao.PlaceDao;
 import com.example.hoshiyo.wictrip.entity.Album;
-import com.example.hoshiyo.wictrip.fragment.AlbumCreationFragment;
 import com.example.hoshiyo.wictrip.fragment.AlbumPictures;
+import com.example.hoshiyo.wictrip.fragment.Gallery;
 
-public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnFragmentInteractionListener {
+public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnFragmentInteractionListener, Gallery.OnFragmentInteractionListener {
 
     private static final String TAG = "Album Activity";
 
@@ -32,13 +24,10 @@ public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnF
         setContentView(R.layout.activity_album);
 
         if (savedInstanceState == null) {
-            Fragment fragment = new AlbumPictures();
-            Bundle bundle = new Bundle();
-            Album album = AlbumDao.getInstance().getItemById(2);
-            bundle.putSerializable(AlbumPictures.ARG_ALBUM, album);
-            fragment.setArguments(bundle);
+            Fragment fragment = AlbumPictures.newInstance(AlbumDao.getInstance().getItemById(2));
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment, null)
+                    .add(R.id.container, fragment, GlobalVariable.FRAG_ALBUM)
                     .commit();
         }
     }
@@ -54,7 +43,24 @@ public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnF
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-        //TODO
+    public void onClickAddPicture(Album album) {
+        Fragment fragment = Gallery.newInstance(album);
+        getSupportFragmentManager()
+                .beginTransaction().addToBackStack(null)
+                .add(R.id.container, fragment, GlobalVariable.FRAG_GALLERY)
+                .commit();
+    }
+
+    @Override
+    public void onGalleryValidated() {
+        onBackPressed();
+        Fragment fragment = getSupportFragmentManager()
+                .findFragmentByTag(GlobalVariable.FRAG_ALBUM);
+        if(fragment != null) {
+            if(fragment instanceof AlbumPictures) {
+                AlbumPictures albumPictures = (AlbumPictures) fragment;
+                albumPictures.refreshAlbum();
+            }
+        }
     }
 }

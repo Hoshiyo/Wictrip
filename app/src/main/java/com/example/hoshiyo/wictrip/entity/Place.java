@@ -13,16 +13,18 @@ public class Place implements Serializable {
     private String countryCode;
     private String locality;
     private String postalCode;
-    private LatLng position;
+    private double lat;
+    private double lng;
 
 
-    public Place(int id, String countryName, String countryCode, String locality, String postalCode, LatLng position) {
+    public Place(int id, String countryName, String countryCode, String locality, String postalCode, double lat, double lng) {
         this.id = id;
         this.countryName = countryName;
         this.countryCode = countryCode;
         this.locality = locality;
         this.postalCode = postalCode;
-        this.position = position;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     public int getId() {
@@ -45,8 +47,12 @@ public class Place implements Serializable {
         return postalCode;
     }
 
-    public LatLng getPosition() {
-        return position;
+    public double getLng() {
+        return lng;
+    }
+
+    public double getLat() {
+        return lat;
     }
 
     @Override

@@ -11,18 +11,20 @@ import java.io.Serializable;
  */
 public class Picture  implements Serializable {
     int id = -1;
-    private Uri uri = null;
+    private String uri = null;
     private String countryCode = null;
     private String postalCode = null;
-    private LatLng position = null;
+    private double lat;
+    private double lng;
     private long dateTaken = -1;
 
-    public Picture(int id, Uri uri, String countryCode, String postalCode, LatLng position, long dateTaken) {
+    public Picture(int id, String uri, String countryCode, String postalCode, double lat, double lng, long dateTaken) {
         this.id = id;
         this.uri = uri;
         this.countryCode = countryCode;
         this.postalCode = postalCode;
-        this.position = position;
+        this.lat = lat;
+        this.lng = lng;
         this.dateTaken = dateTaken;
     }
 
@@ -30,7 +32,7 @@ public class Picture  implements Serializable {
         return id;
     }
 
-    public Uri getUri() {
+    public String getUri() {
         return uri;
     }
 
@@ -42,8 +44,12 @@ public class Picture  implements Serializable {
         return postalCode;
     }
 
-    public LatLng getPosition() {
-        return position;
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLng() {
+        return lng;
     }
 
     public long getDateTaken() {
