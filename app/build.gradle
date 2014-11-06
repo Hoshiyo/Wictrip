@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 'Google Inc.:Google APIs:15'
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '20.0.0'
 
     defaultConfig {
         applicationId "com.example.hoshiyo.wictrip"
@@ -37,4 +37,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:6.1.+'
     compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.squareup.picasso:picasso:2.3.+'
+    compile project(':facebook')
 }
