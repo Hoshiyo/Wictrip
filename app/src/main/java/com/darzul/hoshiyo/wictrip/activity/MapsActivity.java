@@ -83,8 +83,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
 
         // Add permission to see user friends which have Wictrip
-        LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
-        authButton.setReadPermissions("user_friends");
+        //LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
+        //authButton.setReadPermissions("user_friends");
 
         // Initialize uiHelper for facebook session callback
         uiHelper = new UiLifecycleHelper(this, callback);
