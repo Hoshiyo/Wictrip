@@ -4,16 +4,19 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.example.hoshiyo.BitmapDecoder;
+import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.dao.AlbumDao;
 import com.example.hoshiyo.wictrip.dao.PictureDao;
 import com.example.hoshiyo.wictrip.dao.PlaceDao;
 import com.example.hoshiyo.wictrip.service.PictureService;
 
+import java.io.File;
 import java.sql.SQLException;
 
 /**
@@ -44,8 +47,8 @@ public class Wictrip extends Application {
         int height = size.y;
         Log.d(TAG, "W: " + width + " H: " + height);
 
-        // Set picture size for gallery (2 picture per column)
-        BitmapDecoder.init(width/2);
+        // Set picture size for gallery
+        GlobalVariable.PICTURE_SIZE = width/2;
 
         // Start picture service to process user pictures
         startService(new Intent(this, PictureService.class));

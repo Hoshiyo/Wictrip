@@ -3,6 +3,7 @@ package com.example.hoshiyo.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,12 +14,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.hoshiyo.BitmapDecoder;
+import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.R;
 import com.example.hoshiyo.wictrip.dao.AlbumDao;
 import com.example.hoshiyo.wictrip.dao.PictureDao;
 import com.example.hoshiyo.wictrip.entity.Album;
 import com.example.hoshiyo.wictrip.entity.Picture;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,15 +33,19 @@ import java.util.List;
 public class PictureGridViewAdapter extends BaseAdapter {
 
     private static final String TAG = "Picture adapter";
-    private static final int PICTURE_SIZE = BitmapDecoder.PICTURE_SIZE;
+    private static final int PICTURE_SIZE = GlobalVariable.PICTURE_SIZE;
     private Activity mContext;
+    BitmapDecoder bitmapDecoder = BitmapDecoder.getInstance();
     private List<Picture> mPictures;
     private List<Picture> mPicturesSelected;
+    Picasso picasso;
 
     public PictureGridViewAdapter(Activity context, ArrayList<Picture> pictures) {
         mContext = context;
         mPictures = new ArrayList<Picture>(pictures);
         mPicturesSelected = new ArrayList<Picture>();
+        picasso = Picasso.with(mContext);
+        picasso.setIndicatorsEnabled(true);
     }
 
     @Override
@@ -74,7 +82,11 @@ public class PictureGridViewAdapter extends BaseAdapter {
             imageView.setAlpha(0xFF);
         }
 
-        BitmapDecoder.loadBitmap(mPictures.get(position).getUri(), imageView);
+        File f = new File(mPictures.get(position).getUri());
+        picasso.load(f)
+                .resize(PICTURE_SIZE, PICTURE_SIZE)
+                .centerCrop()
+                .into(imageView);
 
         return imageView;
     }

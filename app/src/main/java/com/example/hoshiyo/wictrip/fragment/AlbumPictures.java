@@ -5,8 +5,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +39,6 @@ public class AlbumPictures extends Fragment {
 
     private PictureGridViewAdapter mAdapter = null;
     private Album mAlbum;
-
     private OnFragmentInteractionListener mListener;
 
     /**
