@@ -11,10 +11,14 @@ import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.R;
 import com.example.hoshiyo.wictrip.dao.AlbumDao;
 import com.example.hoshiyo.wictrip.entity.Album;
+import com.example.hoshiyo.wictrip.fragment.AlbumCreationFragment;
 import com.example.hoshiyo.wictrip.fragment.AlbumPictures;
 import com.example.hoshiyo.wictrip.fragment.Gallery;
 
-public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnFragmentInteractionListener, Gallery.OnFragmentInteractionListener {
+public class AlbumActivity extends FragmentActivity
+        implements AlbumPictures.OnFragmentInteractionListener,
+        Gallery.OnFragmentInteractionListener,
+        AlbumCreationFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "Album Activity";
 
@@ -27,7 +31,7 @@ public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnF
             Fragment fragment = AlbumPictures.newInstance(AlbumDao.getInstance().getItemById(2));
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment, GlobalVariable.FRAG_ALBUM)
+                    .add(R.id.container, AlbumCreationFragment.newInstance(), GlobalVariable.FRAG_ALBUM)
                     .commit();
         }
     }
@@ -62,5 +66,12 @@ public class AlbumActivity extends FragmentActivity implements AlbumPictures.OnF
                 albumPictures.refreshAlbum();
             }
         }
+    }
+
+    @Override
+    public void onCreateAlbum(Album album) {
+        onBackPressed();
+        AlbumDao.getInstance().create(album);
+        //TODO refresh album list
     }
 }

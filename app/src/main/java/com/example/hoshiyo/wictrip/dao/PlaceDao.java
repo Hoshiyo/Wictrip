@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.DatabaseHelper;
 import com.example.hoshiyo.wictrip.entity.Place;
 import com.google.android.gms.maps.model.LatLng;
@@ -13,6 +14,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
@@ -98,6 +101,43 @@ public class PlaceDao implements IDao {
             cursor.moveToNext();
         }
         cursor.close();
+
+        Collections.sort((java.util.List<Object>) places, new Comparator<Object>() {
+            @Override
+            public int compare(Object lhs, Object rhs) {
+                Place leftPlace = (Place) lhs;
+                String leftCountryCode = leftPlace.getCountryCode();
+                String leftPostalCode = leftPlace.getPostalCode();
+
+                Place rightPlace = (Place) rhs;
+                String rightCountryCode = rightPlace.getCountryCode();
+                String rightPostalCode = rightPlace.getPostalCode();
+
+                int countryComparison = leftCountryCode.compareTo(rightCountryCode);
+                int postalComparison = 0;
+                if(leftPostalCode != null) {
+                    if(rightPostalCode != null) {
+                        postalComparison = leftPostalCode.compareTo(rightPostalCode);
+                    }
+                    else
+                        postalComparison = 1;
+                }
+                else {
+                    if(rightPostalCode != null) {
+                        postalComparison = -1;
+                    }
+                }
+
+//                Log.d(TAG, leftCountryCode + " compareTo " + rightCountryCode + " -> " + countryComparison);
+//                Log.d(TAG, leftPostalCode + " compareTo " + rightPostalCode + " -> " + postalComparison);
+//                int result = (countryComparison * GlobalVariable.SORT_COUNTRY_WEIGHT)
+//                        + (postalComparison * GlobalVariable.SORT_LOCALITY_WEIGHT);
+//                Log.d(TAG, "Result: " + result);
+
+                return (countryComparison * GlobalVariable.SORT_COUNTRY_WEIGHT)
+                        + (postalComparison * GlobalVariable.SORT_LOCALITY_WEIGHT);
+            }
+        });
     }
 
     /**

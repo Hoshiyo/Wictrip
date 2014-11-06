@@ -4,19 +4,16 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.example.hoshiyo.BitmapDecoder;
 import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.dao.AlbumDao;
 import com.example.hoshiyo.wictrip.dao.PictureDao;
 import com.example.hoshiyo.wictrip.dao.PlaceDao;
 import com.example.hoshiyo.wictrip.service.PictureService;
 
-import java.io.File;
 import java.sql.SQLException;
 
 /**

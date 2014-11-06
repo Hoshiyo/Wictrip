@@ -12,7 +12,6 @@ import com.example.hoshiyo.wictrip.entity.Album;
 import com.example.hoshiyo.wictrip.entity.Picture;
 import com.example.hoshiyo.wictrip.entity.Place;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 

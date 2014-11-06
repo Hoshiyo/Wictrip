@@ -1,30 +1,21 @@
 package com.example.hoshiyo.adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
-import com.example.hoshiyo.BitmapDecoder;
 import com.example.hoshiyo.GlobalVariable;
-import com.example.hoshiyo.wictrip.R;
 import com.example.hoshiyo.wictrip.dao.AlbumDao;
-import com.example.hoshiyo.wictrip.dao.PictureDao;
 import com.example.hoshiyo.wictrip.entity.Album;
 import com.example.hoshiyo.wictrip.entity.Picture;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -35,7 +26,6 @@ public class PictureGridViewAdapter extends BaseAdapter {
     private static final String TAG = "Picture adapter";
     private static final int PICTURE_SIZE = GlobalVariable.PICTURE_SIZE;
     private Activity mContext;
-    BitmapDecoder bitmapDecoder = BitmapDecoder.getInstance();
     private List<Picture> mPictures;
     private List<Picture> mPicturesSelected;
     Picasso picasso;

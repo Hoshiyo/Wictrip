@@ -1,5 +1,6 @@
 package com.example.hoshiyo.wictrip.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,7 +18,6 @@ import android.widget.Toast;
 
 import com.example.hoshiyo.wictrip.DatabaseHelper;
 import com.example.hoshiyo.wictrip.R;
-import com.example.hoshiyo.wictrip.dao.AlbumDao;
 import com.example.hoshiyo.wictrip.dao.PictureDao;
 import com.example.hoshiyo.wictrip.dao.PlaceDao;
 import com.example.hoshiyo.wictrip.entity.Album;
@@ -34,18 +34,34 @@ import java.util.Collection;
  */
 public class AlbumCreationFragment extends Fragment {
 
-    // Result code for datepicker dialog
+    // Result code for date picker dialog
     private static final int DATE_DIALOG_FROM = 1;
     private static final int DATE_DIALOG_TO = 2;
 
     private static final String TAG = "Album Creation Fragment";
 
+    private OnFragmentInteractionListener mListener;
     TextView mName = null;
     Spinner mPlaceSpinner = null;
     Calendar mCalendarFrom = null;
     Calendar mCalendarTo = null;
     TextView mTextViewFrom = null;
     TextView mTextViewTo = null;
+
+    public static AlbumCreationFragment newInstance() {
+        AlbumCreationFragment fragment = new AlbumCreationFragment();
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        if(args != null) {
+
+        }
+    }
 
     @Nullable
     @Override
@@ -127,8 +143,8 @@ public class AlbumCreationFragment extends Fragment {
                     for (Picture picture : albumPictures)
                         Log.d(TAG, "Id: " + picture.getId());
                 }
-
-                AlbumDao.getInstance().create(new Album(-1, albumName, albumPictures, timeBegin, timeEnd, albumPlace));
+                Album album = new Album(-1, albumName, albumPictures, timeBegin, timeEnd, albumPlace);
+                mListener.onCreateAlbum(album);
             }
         });
 
@@ -189,5 +205,36 @@ public class AlbumCreationFragment extends Fragment {
                 mTextViewTo.setText(format.format(mCalendarTo.getTime()));
             }
         }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        public void onCreateAlbum(Album album);
     }
 }
