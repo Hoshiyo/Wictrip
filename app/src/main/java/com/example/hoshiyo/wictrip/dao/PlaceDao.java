@@ -9,7 +9,6 @@ import android.util.Log;
 import com.example.hoshiyo.GlobalVariable;
 import com.example.hoshiyo.wictrip.DatabaseHelper;
 import com.example.hoshiyo.wictrip.entity.Place;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -115,15 +114,13 @@ public class PlaceDao implements IDao {
 
                 int countryComparison = leftCountryCode.compareTo(rightCountryCode);
                 int postalComparison = 0;
-                if(leftPostalCode != null) {
-                    if(rightPostalCode != null) {
+                if (leftPostalCode != null) {
+                    if (rightPostalCode != null) {
                         postalComparison = leftPostalCode.compareTo(rightPostalCode);
-                    }
-                    else
+                    } else
                         postalComparison = 1;
-                }
-                else {
-                    if(rightPostalCode != null) {
+                } else {
+                    if (rightPostalCode != null) {
                         postalComparison = -1;
                     }
                 }
@@ -187,14 +184,25 @@ public class PlaceDao implements IDao {
         Place place = (Place) obj;
         String postalCode = place.getPostalCode();
         String query;
-        if (postalCode == null)
-            query = COLUMN_COUNTRY_CODE + "=?" + " and " + COLUMN_POSTAL_CODE + " is null";
-        else
-            query = COLUMN_COUNTRY_CODE + "=?" + " and " + COLUMN_POSTAL_CODE + "=?";
+        String[] argsValue;
 
+        if (postalCode == null) {
+            argsValue = new String[1];
+            argsValue[0] = place.getCountryCode();
+            query = COLUMN_COUNTRY_CODE + "=?" + " and " + COLUMN_POSTAL_CODE + " is null";
+            Log.d(TAG, "1 -> " + argsValue[0]);
+        } else {
+            argsValue = new String[2];
+            argsValue[0] = place.getCountryCode();
+            argsValue[1] = postalCode;
+            query = COLUMN_COUNTRY_CODE + "=?" + " and " + COLUMN_POSTAL_CODE + "=?";
+            Log.d(TAG, "1 -> " + argsValue[0] + " 2 -> " + argsValue[1]);
+        }
+
+        Log.d(TAG, "locality: " + postalCode);
+        Log.d(TAG, "Query: " + query);
         String[] columns = {COLUMN_ID};
-        String[] whereValues = {place.getCountryCode(), place.getPostalCode()};
-        Cursor cursor = db.query(TABLE_NAME, columns, query, whereValues, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, columns, query, argsValue, null, null, null);
 
         int count = cursor.getCount();
         cursor.close();
