@@ -150,7 +150,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         navMenuIcons.recycle();
 
         // setting the nav drawer list adapter
-        adapter = new NavDrawerListAdapter(getApplicationContext(),navDrawerItems);
+        adapter = new NavDrawerListAdapter(this, navDrawerItems);
         drawer_menu.setAdapter(adapter);
 
         open_close_drawer.setOnClickListener(new View.OnClickListener() {

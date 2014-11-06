@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hoshiyo.wictrip">
+    package="com.example.hoshiyo.wictrip" >
 
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="16" />
 
     <application
+        android:name="com.darzul.hoshiyo.wictrip.Wictrip"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:name="com.darzul.hoshiyo.wictrip.Wictrip"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
             android:name="com.darzul.hoshiyo.wictrip.activity.MapsActivity"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity_maps" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,18 +35,23 @@
         <activity
             android:name="com.darzul.hoshiyo.wictrip.activity.AlbumActivity"
             android:label="@string/title_activity_album" />
-
         <activity android:name="com.facebook.LoginActivity" />
 
         <service
+            android:name="com.darzul.hoshiyo.wictrip.service.PictureService"
             android:enabled="true"
-            android:exported="false"
-            android:name="com.darzul.hoshiyo.wictrip.service.PictureService">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name="com.darzul.hoshiyo.wictrip.activity.MyActivity"
+            android:label="@string/title_activity_my" >
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -57,7 +62,7 @@
     <!--
              The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
              Google Maps Android API v2, but are recommended.
-        -->
+    -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 

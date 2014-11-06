@@ -51,11 +51,12 @@
         <item quantity="one">Do you really want to delete this picture</item>
         <item quantity="other">Do you really want to delete these pictures</item>
     </plurals>
-
     <plurals name="picture_selected">
         <item quantity="zero">picture selected</item>
         <item quantity="one">picture selected</item>
         <item quantity="other">pictures selected</item>
     </plurals>
+
+    <string name="title_activity_my">MyActivity</string>
 
 </resources>
