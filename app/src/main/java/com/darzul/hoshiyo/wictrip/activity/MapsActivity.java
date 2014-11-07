@@ -37,9 +37,6 @@ import com.darzul.hoshiyo.wictrip.fragment.Gallery;
 import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.fragment.Setting;
 import com.facebook.AppEventsLogger;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -61,16 +58,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     private static final String TAG = "MapActivity";
 
-<<<<<<< HEAD
-    private UiLifecycleHelper uiHelper;
-    private Session.StatusCallback callback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-    };
-=======
->>>>>>> 80a07477d7304fd05df7fd6ba2dd52cfe67d4711
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private LocationManager locationManager;
@@ -418,17 +405,14 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             case 5:
                 fragment = new AlbumCreationFragment();
                 break;
-<<<<<<< HEAD
+
             case 7:
-                Toast.makeText(getApplication(),"Friend",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplication(),"Available soon !",Toast.LENGTH_SHORT).show();
                 break;
-            case 8:
-                Toast.makeText(getApplication(),"Parameter",Toast.LENGTH_SHORT).show();
-=======
+
             case 8:
                 Toast.makeText(getApplication(),"Log in",Toast.LENGTH_SHORT).show();
                 fragment = new Setting();
->>>>>>> 80a07477d7304fd05df7fd6ba2dd52cfe67d4711
                 break;
             default:
                 return false;
