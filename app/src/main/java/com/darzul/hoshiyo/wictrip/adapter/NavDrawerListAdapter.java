@@ -54,7 +54,7 @@ public class NavDrawerListAdapter extends BaseAdapter {
         TextView txtCount = (TextView) convertView.findViewById(R.id.counter);
 
         imgIcon.setImageResource(navDrawerItems.get(position).getIcon());
-        txtTitle.setText(navDrawerItems.get(position).getTitle());
+        txtTitle.setText(navDrawerItems.get(position).getItemName());
 
         // displaying count
         // check whether it set visible or not
