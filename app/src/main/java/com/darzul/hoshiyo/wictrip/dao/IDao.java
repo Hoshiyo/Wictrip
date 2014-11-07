@@ -12,4 +12,5 @@ public interface IDao {
     public Object update(Object obj);
     public Object delete(Object obj);
     public boolean exist(Object obj);
+    public void refreshData();
 }

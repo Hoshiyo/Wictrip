@@ -4,11 +4,15 @@ import android.net.Uri;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.parceler.Parcel;
+import org.parceler.ParcelConstructor;
+
 import java.io.Serializable;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 30/10/2014.
  */
+@Parcel(Parcel.Serialization.METHOD)
 public class Picture  implements Serializable {
     int id = -1;
     private String uri = null;
@@ -18,6 +22,7 @@ public class Picture  implements Serializable {
     private double lng;
     private long dateTaken = -1;
 
+    @ParcelConstructor
     public Picture(int id, String uri, String countryCode, String postalCode, double lat, double lng, long dateTaken) {
         this.id = id;
         this.uri = uri;

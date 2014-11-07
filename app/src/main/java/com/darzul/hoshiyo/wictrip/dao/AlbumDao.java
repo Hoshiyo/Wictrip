@@ -14,6 +14,7 @@ import com.darzul.hoshiyo.wictrip.entity.Place;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
@@ -26,17 +27,17 @@ public class AlbumDao implements IDao {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_PICTURES = "pictures";
-    public static final String COLUMN_DATE_BEGIN = "date_begin";
-    public static final String COLUMN_DATE_END = "date_end";
+    public static final String COLUMN_TIME_BEGIN = "date_begin";
+    public static final String COLUMN_TIME_END = "date_end";
     public static final String COLUMN_PLACE = "place";
     public static final String[] allColumns = {COLUMN_ID, COLUMN_NAME,
-            COLUMN_PICTURES, COLUMN_DATE_BEGIN, COLUMN_DATE_END, COLUMN_PLACE};
+            COLUMN_PICTURES, COLUMN_TIME_BEGIN, COLUMN_TIME_END, COLUMN_PLACE};
     private static final String TABLE_CREATION = "create table " + TABLE_NAME
             + "(" + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_NAME + " text not null, "
             + COLUMN_PLACE + " integer, "
-            + COLUMN_DATE_BEGIN + " integer, "
-            + COLUMN_DATE_END + " integer, "
+            + COLUMN_TIME_BEGIN + " integer, "
+            + COLUMN_TIME_END + " integer, "
             + COLUMN_PICTURES + " text, "
             + "foreign key (" + COLUMN_PLACE + ") "
             + "references " + PlaceDao.TABLE_NAME + " (" + PlaceDao.COLUMN_ID + "))";
@@ -167,16 +168,21 @@ public class AlbumDao implements IDao {
         return false;
     }
 
+    @Override
+    public void refreshData() {
+        fetchAll();
+    }
+
     private Album cursorToAlbum(Cursor cursor) {
         int id = cursor.getInt(0);
         String name = cursor.getString(1);
-        Collection<Picture> pictures = stringToPictures(cursor.getString(2));
+        List<Picture> pictures = (List<Picture>) stringToPictures(cursor.getString(2));
         Log.d(TAG, name + ": " + pictures.size());
 
         long timeBegin = cursor.getLong(3);
         long timeEnd = cursor.getLong(4);
 
-        Place place = (Place) PlaceDao.getInstance().getItemById(cursor.getInt(5));
+        Place place = PlaceDao.getInstance().getItemById(cursor.getInt(5));
 
         return new Album(id, name, pictures, timeBegin, timeEnd, place);
     }
@@ -221,8 +227,8 @@ public class AlbumDao implements IDao {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, album.getName());
         values.put(COLUMN_PICTURES, PicturesToString(album));
-        values.put(COLUMN_DATE_BEGIN, album.getDateBegin().getTimeInMillis());
-        values.put(COLUMN_DATE_END, album.getDateEnd().getTimeInMillis());
+        values.put(COLUMN_TIME_BEGIN, album.getTimeBegin());
+        values.put(COLUMN_TIME_END, album.getTimeEnd());
         values.put(COLUMN_PLACE, album.getPlace().getId());
 
         return values;

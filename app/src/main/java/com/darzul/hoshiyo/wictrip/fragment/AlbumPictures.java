@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +18,12 @@ import android.widget.TextView;
 
 import com.darzul.hoshiyo.wictrip.GlobalVariable;
 import com.darzul.hoshiyo.wictrip.adapter.PictureGridViewAdapter;
-import com.example.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
 import com.darzul.hoshiyo.wictrip.entity.Picture;
+
+import org.parceler.Parcels;
 
 import java.util.Collection;
 
@@ -49,7 +52,7 @@ public class AlbumPictures extends Fragment {
     public static AlbumPictures newInstance(Album album) {
         AlbumPictures fragment = new AlbumPictures();
         Bundle args = new Bundle();
-        args.putSerializable(GlobalVariable.ARG_ALBUM, album);
+        args.putParcelable(GlobalVariable.ARG_ALBUM, Parcels.wrap(album));
         fragment.setArguments(args);
         return fragment;
     }

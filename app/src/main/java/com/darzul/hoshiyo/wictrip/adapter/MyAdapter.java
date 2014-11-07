@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.darzul.hoshiyo.wictrip.NavDrawerChild;
 import com.darzul.hoshiyo.wictrip.NavDrawerGroup;
-import com.example.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.R;
 
 import java.util.Collection;
 import java.util.List;

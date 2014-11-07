@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 
 import com.darzul.hoshiyo.wictrip.GlobalVariable;
-import com.example.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumCreationFragment;

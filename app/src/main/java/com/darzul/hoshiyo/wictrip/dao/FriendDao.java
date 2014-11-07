@@ -44,4 +44,7 @@ public class FriendDao implements IDao {
     public boolean exist(Object obj) {
         return false;
     }
+
+    @Override
+    public void refreshData() {}
 }
