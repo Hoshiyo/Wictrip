@@ -109,6 +109,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
 
+    EditText searchLocationDrawer = null;
+    Button goLocationDrawer = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,7 +143,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
-                if(groupPosition == 0 || groupPosition == 1 || groupPosition == 3) {
+                if(groupPosition == 0 || groupPosition == 1 || groupPosition == 2
+                        || groupPosition == 4 || groupPosition == 5 || groupPosition == 7
+                        || groupPosition == 8 || groupPosition == 9) {
 
                     //event to click item on menu list
                     //mDrawerList.setOnItemClickListener(new SlideMenuClickListener());
@@ -177,6 +182,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         // Setting button click event listener for the find button
         goLocation.setOnClickListener(findClickListener);
+        goLocationDrawer.setOnClickListener(findClickListener);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE); //access different radar
 
@@ -190,12 +196,16 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         listDataChild = new HashMap<String, List<String>>();
 
         // Adding child data
+        listDataHeader.add(navMenuHeaders[0]);
         listDataHeader.add(navMenuItemName[0]);
         listDataHeader.add(navMenuItemName[1]);
         listDataHeader.add(navMenuItemName[2]);
+        listDataHeader.add(navMenuHeaders[1]);
         listDataHeader.add(navMenuItemName[3]);
         listDataHeader.add(navMenuItemName[4]);
+        listDataHeader.add(navMenuHeaders[2]);
         listDataHeader.add(navMenuItemName[5]);
+        listDataHeader.add(navMenuHeaders[3]);
 
         List<String> places = new ArrayList<String>();
         Collection<Object> placeDaos = PlaceDao.getInstance().getAll();
@@ -215,8 +225,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             albums.add(album.getName());
         }
 
-        listDataChild.put(listDataHeader.get(2), places); // Header, Child data
-        listDataChild.put(listDataHeader.get(4), albums);
+        listDataChild.put(listDataHeader.get(3), places); // Header, Child data
+        listDataChild.put(listDataHeader.get(6), albums);
 
     }
 
@@ -233,6 +243,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         open_close_drawer = (Button)findViewById(R.id.open_close_drawer);
         goLocation = (Button)findViewById(R.id.locationGo);
         addLocation = (Button) findViewById(R.id.addPlace);
+        goLocationDrawer = (Button)findViewById(R.id.locationGoDrawer);
     }
 
     private void setItemData() {
@@ -270,6 +281,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ExpandableListView) findViewById(R.id.lvExp);
+
 
         setSubItemData();
 
@@ -505,7 +517,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
 
         switch (position) {
-            case 0:
+            case 1:
                 Collection<Object> placeDaos = PlaceDao.getInstance().getAll();
                 Place place;
 
@@ -514,13 +526,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLat(), place.getLng())).title(place.getCountryName()));
                 }
                 break;
-            case 1:
+            case 2:
                 Toast.makeText(getApplication(),"To go",Toast.LENGTH_SHORT).show();
                 break;
-            case 3:
+            case 5:
                 fragment = new AlbumCreationFragment();
                 break;
-            case 5:
+            case 7:
                 Toast.makeText(getApplication(),"Log in",Toast.LENGTH_SHORT).show();
                 break;
             default:

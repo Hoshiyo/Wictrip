@@ -17,6 +17,7 @@
     <string name="open_menu">Open</string>
     <string name="close_menu">Close</string>
     <string name="menu">menu</string>
+    <string name="search">Enter search</string>
 
     <!-- Nav Drawer Header Menu Items -->
     <string-array name="nav_drawer_header_parts">
