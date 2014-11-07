@@ -2,7 +2,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:orientation="vertical">
 
     <RelativeLayout
         xmlns:tools="http://schemas.android.com/tools"
@@ -30,7 +31,7 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginLeft="3dp"
                 android:id="@+id/locationGo"
-                android:background="@drawable/abc_ic_search"/>
+                android:background="@drawable/abc_ic_search_api_mtrl_alpha"/>
 
             <EditText
                 android:id="@+id/locationSearch"
@@ -62,11 +63,19 @@
                 android:background="@drawable/ic_drawer"
                 android:layout_alignParentBottom="true"/>
 
+            <com.facebook.widget.LoginButton
+                android:id="@+id/authButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                />
+
         </RelativeLayout>
 
     </RelativeLayout>
 
-    <ListView
+    <!-- <ListView
         android:id="@+id/slider_menu"
         android:layout_width="240dp"
         android:layout_height="match_parent"
@@ -74,5 +83,16 @@
         android:divider="@color/common_signin_btn_light_text_default"
         android:dividerHeight="1dp"
         android:background="@color/wallet_dim_foreground_inverse_holo_dark"/>
+-->
+    <!-- The navigation drawer -->
+    <ExpandableListView
+        android:id="@+id/lvExp"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111"/>
 
 </android.support.v4.widget.DrawerLayout>

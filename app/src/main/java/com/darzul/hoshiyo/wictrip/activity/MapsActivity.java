@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -17,11 +18,24 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.darzul.hoshiyo.wictrip.GlobalVariable;
+import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
+import com.darzul.hoshiyo.wictrip.dao.PictureDao;
+import com.darzul.hoshiyo.wictrip.dao.PlaceDao;
+import com.darzul.hoshiyo.wictrip.entity.Album;
+import com.darzul.hoshiyo.wictrip.entity.Picture;
+import com.darzul.hoshiyo.wictrip.entity.Place;
+import com.darzul.hoshiyo.wictrip.fragment.AlbumCreationFragment;
+import com.darzul.hoshiyo.wictrip.fragment.AlbumPictures;
+import com.darzul.hoshiyo.wictrip.fragment.Gallery;
 import com.example.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.adapter.NavDrawerListAdapter;
 import com.darzul.hoshiyo.wictrip.fragment.NavDrawerItem;
@@ -38,9 +52,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements LocationListener {
+public class MapsActivity extends FragmentActivity implements LocationListener,
+        AlbumPictures.OnFragmentInteractionListener,
+        Gallery.OnFragmentInteractionListener,
+        AlbumCreationFragment.OnFragmentInteractionListener {
 
     private static final long TIME_BETWEEN_TWO_POINTS = 50000;
     private static final float DISTANCE_BETWEEN_TWO_POINTS = 3000;
@@ -60,9 +79,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     private LocationManager locationManager;
     //private static String PROX_ALERT = "String fr.esiea.mobile.prox";
 
+    private DrawerLayout drawerLayout = null;
+    private ListView drawer_menu = null;
+
     EditText searchLocation = null;
     Button goLocation = null;
     Button open_close_drawer = null;
+    Button addLocation = null;
 
     // nav drawer title
     private CharSequence mDrawerTitle = null;
@@ -71,16 +94,24 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     private CharSequence mTitle = null;
 
     // slide menu items
-    private String[] navMenuTitles = null;
+    private String[] navMenuHeaders = null;
     private TypedArray navMenuIcons = null;
+    private String[] navMenuItemName = null;
 
-    private ArrayList<NavDrawerItem> navDrawerItems = null;
-    private NavDrawerListAdapter adapter = null;
+    //private ArrayList<NavDrawerItem> navDrawerItems = null;
+    private ArrayList<String> navDrawerItems = null;
+    private NavDrawerListAdapter itemAdapter = null;
+
+
+    DrawerLayout mDrawerLayout;
+    ExpandableListAdapter mAdapter;
+    ExpandableListView mDrawerList;
+    List<String> listDataHeader;
+    HashMap<String, List<String>> listDataChild;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         // Add permission to see user friends which have Wictrip
         //LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
@@ -90,7 +121,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_maps);
 
         //load map
@@ -98,60 +128,29 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
         mTitle = mDrawerTitle = getTitle();
 
-        // load slide menu items
-        navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
+        initButton();
 
-        // nav drawer icons from resources
-        navMenuIcons = getResources().obtainTypedArray(R.array.nav_drawer_icons);
+        loadResources();
 
-        //Récupération des éléments provenant des layouts
-        final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        open_close_drawer = (Button)findViewById(R.id.open_close_drawer);
-        goLocation = (Button)findViewById(R.id.locationGo);
+        //setItemData();
 
-        //Définition du contenu menu
-        ListView drawer_menu = (ListView)findViewById(R.id.slider_menu);
+        initDrawer();
 
-        navDrawerItems = new ArrayList<NavDrawerItem>();
+        mDrawerList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                if(groupPosition == 0 || groupPosition == 1 || groupPosition == 3) {
 
-        // adding nav drawer items to array
-        // Place, Will add a counter here
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[0], -1, true, "50+"));
-        // Already visited
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[1], navMenuIcons.getResourceId(0, -1)));
-        // To visit
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[2], navMenuIcons.getResourceId(1, -1)));
-        // Visualisation
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], -1));
-        // Album, Will add a counter here
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], -1,  true, "50+"));
-        // Create
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(2, -1)));
-        // Visualisation
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[6], -1));
-        // Friends, Will add a counter here
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[7], -1, true, "50+"));
-        // Parameters
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[8], -1));;
-
-        android.support.v4.widget.DrawerLayout.LayoutParams params = (android.support.v4.widget.DrawerLayout.LayoutParams) drawer_menu.getLayoutParams();
-        params.leftMargin = -15;
-
-
-        for(int i=0; i<navDrawerItems.size(); i++) {
-            if(navMenuTitles[i] == "PLACES" || navMenuTitles[i] == "ALBUMS"
-                    || navMenuTitles[i] == "FRIENDS"
-                    || navMenuTitles[i] == "PARAMETERS" ) {
-
+                    //event to click item on menu list
+                    //mDrawerList.setOnItemClickListener(new SlideMenuClickListener());
+                    displayView(groupPosition);
+                    return true;
+                } else {
+                    return false;
+                }
             }
-        }
-
-        // Recycle the typed array
-        navMenuIcons.recycle();
-
-        // setting the nav drawer list adapter
-        adapter = new NavDrawerListAdapter(this, navDrawerItems);
-        drawer_menu.setAdapter(adapter);
+        });
 
         open_close_drawer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,6 +184,98 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         //registerReceiver(new MyLocationPromixityReceiver(this), filter);
     }
 
+    private void setSubItemData() {
+        //listDataHeader = new ArrayList<NavDrawerItem>();
+        listDataHeader = new ArrayList<String>();
+        listDataChild = new HashMap<String, List<String>>();
+
+        // Adding child data
+        listDataHeader.add(navMenuItemName[0]);
+        listDataHeader.add(navMenuItemName[1]);
+        listDataHeader.add(navMenuItemName[2]);
+        listDataHeader.add(navMenuItemName[3]);
+        listDataHeader.add(navMenuItemName[4]);
+        listDataHeader.add(navMenuItemName[5]);
+
+        List<String> places = new ArrayList<String>();
+        Collection<Object> placeDaos = PlaceDao.getInstance().getAll();
+        Place place;
+
+        for(Object obj : placeDaos) {
+            place = (Place) obj;
+            places.add(place.getCountryName());
+        }
+
+        List<String> albums = new ArrayList<String>();
+        Collection<Object> albumDaos = AlbumDao.getInstance().getAll();
+        Album album;
+
+        for(Object obj : albumDaos) {
+            album = (Album) obj;
+            albums.add(album.getName());
+        }
+
+        listDataChild.put(listDataHeader.get(2), places); // Header, Child data
+        listDataChild.put(listDataHeader.get(4), albums);
+
+    }
+
+    private void loadResources() {
+        // load slide header menu items, nav drawer icons from resources and av drawer icons from resources
+        navMenuHeaders = getResources().getStringArray(R.array.nav_drawer_header_parts);
+        navMenuIcons = getResources().obtainTypedArray(R.array.nav_drawer_icons);
+        navMenuItemName = getResources().getStringArray(R.array.nav_drawer_items);
+    }
+
+    private void initButton() {
+        //Recuperation items from layouts
+        drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        open_close_drawer = (Button)findViewById(R.id.open_close_drawer);
+        goLocation = (Button)findViewById(R.id.locationGo);
+        addLocation = (Button) findViewById(R.id.addPlace);
+    }
+
+    private void setItemData() {
+        //navDrawerItems = new ArrayList<NavDrawerItem>();
+
+        // adding nav drawer items to array
+        // Place
+        /*navDrawerItems.add(new NavDrawerItem(navMenuHeaders[0]));
+        // Already visited
+        navDrawerItems.add(new NavDrawerItem(navMenuItemName[0], navMenuIcons.getResourceId(0, -1)));
+        // To visit
+        navDrawerItems.add(new NavDrawerItem(navMenuItemName[1], navMenuIcons.getResourceId(0, -1)));
+        // Album
+        navDrawerItems.add(new NavDrawerItem(navMenuHeaders[1]));
+        // Create
+        navDrawerItems.add(new NavDrawerItem(navMenuItemName[3], navMenuIcons.getResourceId(0, -1)));
+        // Friends
+        navDrawerItems.add(new NavDrawerItem(navMenuHeaders[2]));
+        // Parameters
+        navDrawerItems.add(new NavDrawerItem(navMenuHeaders[3]));*/
+
+        // Recycle the typed array
+        navMenuIcons.recycle();
+
+    }
+
+    private void initDrawer() {
+        //Definition of menu content
+        /*drawer_menu = (ListView)findViewById(R.id.slider_menu);
+
+        // setting the nav drawer list adapter
+        itemAdapter = new NavDrawerListAdapter(getApplicationContext(),navDrawerItems);
+        drawer_menu.setAdapter(itemAdapter);*/
+
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ExpandableListView) findViewById(R.id.lvExp);
+
+        setSubItemData();
+
+        mAdapter = new MyAdapter(this, listDataHeader, listDataChild);
+        mDrawerList.setAdapter(mAdapter);
+    }
 
     @Override
     protected void onResume() {
@@ -328,8 +419,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        //Validation de la sélection du bouton d'affichage du menu
-        return /*drawerToggle.onOptionsItemSelected(item) ||*/ super.onOptionsItemSelected(item);
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     // An AsyncTask class for accessing the GeoCoding Web Service
@@ -383,6 +481,96 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             }
         }
+    }
+
+    /**
+     * Slide menu item click listener
+     * */
+
+    private class SlideMenuClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // display view for selected nav drawer item
+            Log.d("DEBUG","Miracleeeeeeeeeeeeeeeeee");
+            displayView(position);
+        }
+    }
+
+    /**
+     * Diplaying fragment view for selected nav drawer list item
+     * */
+    private void displayView(int position) {
+        // update the main content by replacing fragments
+        Fragment fragment = null;
+
+
+        switch (position) {
+            case 0:
+                Collection<Object> placeDaos = PlaceDao.getInstance().getAll();
+                Place place;
+
+                for(Object obj : placeDaos) {
+                    place = (Place) obj;
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLat(), place.getLng())).title(place.getCountryName()));
+                }
+                break;
+            case 1:
+                Toast.makeText(getApplication(),"To go",Toast.LENGTH_SHORT).show();
+                break;
+            case 3:
+                fragment = new AlbumCreationFragment();
+                break;
+            case 5:
+                Toast.makeText(getApplication(),"Log in",Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_field, fragment)
+                    .addToBackStack(null)
+                    .commit();
+
+            // update selected item and title, then close the drawer
+            mDrawerList.setItemChecked(position, true);
+            mDrawerList.setSelection(position);
+            drawerLayout.closeDrawer(mDrawerList);
+        } else {
+            // error in creating fragment
+            Log.e("MainActivity", "Error in creating fragment");
+        }
+    }
+
+    @Override
+    public void onClickAddPicture(Album album) {
+        Fragment fragment = Gallery.newInstance(album);
+        getSupportFragmentManager()
+                .beginTransaction().addToBackStack(null)
+                .add(R.id.container, fragment, GlobalVariable.FRAG_GALLERY)
+                .commit();
+    }
+
+    @Override
+    public void onGalleryValidated() {
+        onBackPressed();
+        Fragment fragment = getSupportFragmentManager()
+                .findFragmentByTag(GlobalVariable.FRAG_ALBUM);
+        if(fragment != null) {
+            if(fragment instanceof AlbumPictures) {
+                AlbumPictures albumPictures = (AlbumPictures) fragment;
+                albumPictures.refreshAlbum();
+            }
+        }
+    }
+
+    @Override
+    public void onCreateAlbum(Album album) {
+        onBackPressed();
+        AlbumDao.getInstance().create(album);
+        //TODO refresh album list
     }
 
     // Callback for facebook session status

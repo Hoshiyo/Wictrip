@@ -2,21 +2,25 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/common_signin_btn_dark_text_default"
+    android:paddingBottom="50dp">
 
     <EditText
         android:id="@+id/album_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint="@string/enter_album_name"
-        android:inputType="text" />
+        android:inputType="text"
+        android:layout_marginTop="30dp"/>
 
     <Spinner
         android:id="@+id/places_spinner"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/album_name" />
+        android:layout_below="@id/album_name"
+        android:layout_marginTop="30dp"/>
 
     <TextView
         android:id="@+id/date_picker_from"
@@ -24,7 +28,8 @@
         android:layout_height="40dip"
         android:text="@string/from"
         android:layout_below="@id/places_spinner"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:layout_marginTop="30dp"/>
 
     <TextView
         android:id="@+id/date_picker_to"
@@ -32,7 +37,8 @@
         android:layout_height="40dip"
         android:text="@string/to"
         android:layout_below="@id/date_picker_from"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:layout_marginTop="30dp"/>
 
     <Button
         android:id="@+id/create_btn"
@@ -40,13 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/date_picker_to"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"/>
 
-    <com.facebook.widget.LoginButton
-        android:id="@+id/authButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        />
 </RelativeLayout>

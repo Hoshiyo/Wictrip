@@ -16,7 +16,7 @@ import com.darzul.hoshiyo.wictrip.fragment.Gallery;
 public class AlbumActivity extends FragmentActivity
         implements AlbumPictures.OnFragmentInteractionListener,
         Gallery.OnFragmentInteractionListener,
-        AlbumCreationFragment.OnFragmentInteractionListener{
+        AlbumCreationFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "Album Activity";
 
