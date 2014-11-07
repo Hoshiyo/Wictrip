@@ -27,23 +27,21 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.darzul.hoshiyo.wictrip.GlobalVariable;
+import com.darzul.hoshiyo.wictrip.NavDrawerChild;
+import com.darzul.hoshiyo.wictrip.NavDrawerGroup;
+import com.darzul.hoshiyo.wictrip.adapter.MyAdapter;
 import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
-import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.dao.PlaceDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
-import com.darzul.hoshiyo.wictrip.entity.Picture;
 import com.darzul.hoshiyo.wictrip.entity.Place;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumCreationFragment;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumPictures;
 import com.darzul.hoshiyo.wictrip.fragment.Gallery;
 import com.example.hoshiyo.wictrip.R;
-import com.darzul.hoshiyo.wictrip.adapter.NavDrawerListAdapter;
-import com.darzul.hoshiyo.wictrip.fragment.NavDrawerItem;
 import com.facebook.AppEventsLogger;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
-import com.facebook.widget.LoginButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -98,15 +96,14 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private TypedArray navMenuIcons = null;
     private String[] navMenuItemName = null;
 
-    //private ArrayList<NavDrawerItem> navDrawerItems = null;
+    //private ArrayList<NavDrawerChild> navDrawerItems = null;
     private ArrayList<String> navDrawerItems = null;
-    private NavDrawerListAdapter itemAdapter = null;
 
 
     DrawerLayout mDrawerLayout;
     ExpandableListAdapter mAdapter;
     ExpandableListView mDrawerList;
-    List<String> listDataHeader;
+    ArrayList<NavDrawerGroup> listDataHeader;
     HashMap<String, List<String>> listDataChild;
 
     @Override
@@ -140,15 +137,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
-                if(groupPosition == 0 || groupPosition == 1 || groupPosition == 3) {
 
-                    //event to click item on menu list
-                    //mDrawerList.setOnItemClickListener(new SlideMenuClickListener());
-                    displayView(groupPosition);
-                    return true;
-                } else {
-                    return false;
-                }
+                return displayView(groupPosition);
             }
         });
 
@@ -185,44 +175,42 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     private void setSubItemData() {
-        //listDataHeader = new ArrayList<NavDrawerItem>();
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<String>>();
+        //listDataHeader = new ArrayList<NavDrawerChild>();
+        listDataHeader = new ArrayList<NavDrawerGroup>();
+        List<NavDrawerChild> children = null;
 
-        // Adding child data
-        listDataHeader.add(navMenuItemName[0]);
-        listDataHeader.add(navMenuItemName[1]);
-        listDataHeader.add(navMenuItemName[2]);
-        listDataHeader.add(navMenuItemName[3]);
-        listDataHeader.add(navMenuItemName[4]);
-        listDataHeader.add(navMenuItemName[5]);
-
-        List<String> places = new ArrayList<String>();
-        Collection<Object> placeDaos = PlaceDao.getInstance().getAll();
+        Collection<Object> places = PlaceDao.getInstance().getAll();
         Place place;
 
-        for(Object obj : placeDaos) {
-            place = (Place) obj;
-            places.add(place.getCountryName());
-        }
-
-        List<String> albums = new ArrayList<String>();
-        Collection<Object> albumDaos = AlbumDao.getInstance().getAll();
+        Collection<Object> albums = AlbumDao.getInstance().getAll();
         Album album;
 
-        for(Object obj : albumDaos) {
-            album = (Album) obj;
-            albums.add(album.getName());
+        // Adding child data
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[0], -1, null));
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[1], R.drawable.ic_menu_add, null));
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[2], R.drawable.ic_menu_add, null));
+
+        children = new ArrayList<NavDrawerChild>();
+        for(Object obj : places) {
+            place = (Place) obj;
+            children.add(new NavDrawerChild(place.toString(), R.drawable.ic_menu_add, -1));
         }
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[3], -1, children));
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[4], -1, null));
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[5], R.drawable.ic_menu_add, null));
 
-        listDataChild.put(listDataHeader.get(2), places); // Header, Child data
-        listDataChild.put(listDataHeader.get(4), albums);
-
+        children = new ArrayList<NavDrawerChild>();
+        for(Object obj : albums) {
+            album = (Album) obj;
+            children.add(new NavDrawerChild(album.toString(), R.drawable.ic_menu_add, -1));
+        }
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[6], -1, children));
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[7], -1, null));
+        listDataHeader.add(new NavDrawerGroup(navMenuItemName[8], R.drawable.ic_settings, null));
     }
 
     private void loadResources() {
         // load slide header menu items, nav drawer icons from resources and av drawer icons from resources
-        navMenuHeaders = getResources().getStringArray(R.array.nav_drawer_header_parts);
         navMenuIcons = getResources().obtainTypedArray(R.array.nav_drawer_icons);
         navMenuItemName = getResources().getStringArray(R.array.nav_drawer_items);
     }
@@ -236,23 +224,23 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     private void setItemData() {
-        //navDrawerItems = new ArrayList<NavDrawerItem>();
+        //navDrawerItems = new ArrayList<NavDrawerChild>();
 
         // adding nav drawer items to array
         // Place
-        /*navDrawerItems.add(new NavDrawerItem(navMenuHeaders[0]));
+        /*navDrawerItems.add(new NavDrawerChild(navMenuHeaders[0]));
         // Already visited
-        navDrawerItems.add(new NavDrawerItem(navMenuItemName[0], navMenuIcons.getResourceId(0, -1)));
+        navDrawerItems.add(new NavDrawerChild(navMenuItemName[0], navMenuIcons.getResourceId(0, -1)));
         // To visit
-        navDrawerItems.add(new NavDrawerItem(navMenuItemName[1], navMenuIcons.getResourceId(0, -1)));
+        navDrawerItems.add(new NavDrawerChild(navMenuItemName[1], navMenuIcons.getResourceId(0, -1)));
         // Album
-        navDrawerItems.add(new NavDrawerItem(navMenuHeaders[1]));
+        navDrawerItems.add(new NavDrawerChild(navMenuHeaders[1]));
         // Create
-        navDrawerItems.add(new NavDrawerItem(navMenuItemName[3], navMenuIcons.getResourceId(0, -1)));
+        navDrawerItems.add(new NavDrawerChild(navMenuItemName[3], navMenuIcons.getResourceId(0, -1)));
         // Friends
-        navDrawerItems.add(new NavDrawerItem(navMenuHeaders[2]));
+        navDrawerItems.add(new NavDrawerChild(navMenuHeaders[2]));
         // Parameters
-        navDrawerItems.add(new NavDrawerItem(navMenuHeaders[3]));*/
+        navDrawerItems.add(new NavDrawerChild(navMenuHeaders[3]));*/
 
         // Recycle the typed array
         navMenuIcons.recycle();
@@ -273,7 +261,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         setSubItemData();
 
-        mAdapter = new MyAdapter(this, listDataHeader, listDataChild);
+        mAdapter = new MyAdapter(this, listDataHeader);
         mDrawerList.setAdapter(mAdapter);
     }
 
@@ -499,13 +487,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     /**
      * Diplaying fragment view for selected nav drawer list item
      * */
-    private void displayView(int position) {
+    private boolean displayView(int position) {
         // update the main content by replacing fragments
         Fragment fragment = null;
 
 
         switch (position) {
-            case 0:
+            case 1:
                 Collection<Object> placeDaos = PlaceDao.getInstance().getAll();
                 Place place;
 
@@ -514,17 +502,17 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLat(), place.getLng())).title(place.getCountryName()));
                 }
                 break;
-            case 1:
+            case 2:
                 Toast.makeText(getApplication(),"To go",Toast.LENGTH_SHORT).show();
                 break;
-            case 3:
+            case 5:
                 fragment = new AlbumCreationFragment();
                 break;
-            case 5:
+            case 7:
                 Toast.makeText(getApplication(),"Log in",Toast.LENGTH_SHORT).show();
                 break;
             default:
-                break;
+                return false;
         }
 
         if (fragment != null) {
@@ -542,6 +530,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             // error in creating fragment
             Log.e("MainActivity", "Error in creating fragment");
         }
+
+        return true;
     }
 
     @Override

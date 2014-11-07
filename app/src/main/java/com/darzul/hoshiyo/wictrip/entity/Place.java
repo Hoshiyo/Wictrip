@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
  */
-public class Place implements Serializable, Comparable<Place> {
+public class Place implements Serializable {
     int id = -1;
     private String countryName;
     private String countryCode;
@@ -62,16 +62,5 @@ public class Place implements Serializable, Comparable<Place> {
         } else {
             return locality + " (" + postalCode + ")";
         }
-    }
-
-    @Override
-    public int compareTo(Place otherPlace) {
-        String otherCountryCode = otherPlace.getCountryCode();
-        String otherPostalCode = otherPlace.getPostalCode();
-
-        int countryComparison = countryCode.compareTo(otherCountryCode);
-        int postalComparison = postalCode.compareTo(otherPostalCode);
-
-        return (countryComparison * GlobalVariable.SORT_COUNTRY_WEIGHT) + postalComparison;
     }
 }
