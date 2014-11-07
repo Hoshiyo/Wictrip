@@ -1,30 +1,40 @@
 package com.darzul.hoshiyo.wictrip.entity;
 
+import org.parceler.Parcel;
+import org.parceler.ParcelConstructor;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
  */
-public class Album  implements Serializable {
+@Parcel(Parcel.Serialization.METHOD)
+public class Album {
     private static final String TAG = "Album";
     int id = -1;
     String name = null; // Album name
-    Collection<Picture> pictures = new ArrayList<Picture>();
-    Calendar dateBegin = null;
-    Calendar dateEnd = null;
+    List<Picture> pictures = new ArrayList<Picture>();
+    //Calendar dateBegin = null;
+    //Calendar dateEnd = null;
+    long timeBegin;
+    long timeEnd;
     Place place = null;
 
-    public Album(int id, String name, Collection<Picture> pictures, long timeBegin, long timeEnd, Place place) {
+    @ParcelConstructor
+    public Album(int id, String name, List<Picture> pictures, long timeBegin, long timeEnd, Place place) {
         this.id = id;
         this.name = name;
         this.pictures = pictures;
-        this.dateBegin = Calendar.getInstance();
-        this.dateBegin.setTimeInMillis(timeBegin);
-        this.dateEnd = Calendar.getInstance();
-        this.dateEnd.setTimeInMillis(timeEnd);
+        this.timeBegin = timeBegin;
+        //this.dateBegin = Calendar.getInstance();
+        //this.dateBegin.setTimeInMillis(timeBegin);
+        this.timeEnd = timeEnd;
+        //this.dateEnd = Calendar.getInstance();
+        //this.dateEnd.setTimeInMillis(timeEnd);
         this.place = place;
     }
 
@@ -36,16 +46,16 @@ public class Album  implements Serializable {
         return name;
     }
 
-    public Collection<Picture> getPictures() {
+    public List<Picture> getPictures() {
         return pictures;
     }
 
-    public Calendar getDateBegin() {
-        return dateBegin;
+    public long getTimeBegin() {
+        return timeBegin;
     }
 
-    public Calendar getDateEnd() {
-        return dateEnd;
+    public long getTimeEnd() {
+        return timeEnd;
     }
 
     public Place getPlace() {

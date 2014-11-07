@@ -156,6 +156,11 @@ public class PictureDao implements IDao {
         return false;
     }
 
+    @Override
+    public void refreshData() {
+        fetchAll();
+    }
+
     /**
      * Check if the picture is already in the DB
      *

@@ -78,8 +78,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (Object obj : albums) {
             album = (Album) obj;
             Log.d(TAG, "Id: " + album.getId() + " Name: " + album.getName()
-                    + " dateBegin: " + format.format(album.getDateBegin().getTime())
-                    + " dateEnd: " + format.format(album.getDateEnd().getTime())
+                    + " dateBegin: " + format.format(album.getTimeBegin())
+                    + " dateEnd: " + format.format(album.getTimeEnd())
                     + " Place: " + album.getPlace().getId());
         }
     }

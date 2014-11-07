@@ -37,7 +37,8 @@ import com.darzul.hoshiyo.wictrip.entity.Place;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumCreationFragment;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumPictures;
 import com.darzul.hoshiyo.wictrip.fragment.Gallery;
-import com.example.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.fragment.Setting;
 import com.facebook.AppEventsLogger;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -63,14 +64,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private static final float DISTANCE_BETWEEN_TWO_POINTS = 3000;
 
     private static final String TAG = "MapActivity";
-
-    private UiLifecycleHelper uiHelper;
-    private Session.StatusCallback callback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-    };
 
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -109,14 +102,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Add permission to see user friends which have Wictrip
-        //LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
-        //authButton.setReadPermissions("user_friends");
-
-        // Initialize uiHelper for facebook session callback
-        uiHelper = new UiLifecycleHelper(this, callback);
-        uiHelper.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_maps);
 
@@ -269,20 +254,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     protected void onResume() {
         super.onResume();
 
-
-        // For scenarios where the main activity is launched and user
-        // session is not null, the session state change notification
-        // may not be triggered. Trigger it if it's open/closed.
-        Session session = Session.getActiveSession();
-        if (session != null &&
-                (session.isOpened() || session.isClosed()) ) {
-            onSessionStateChange(session, session.getState(), null);
-        }
-
-        uiHelper.onResume();
-
-
-        // Logs 'install' and 'app activate' App Events.
+        // Logs 'install' and 'app activate' App Events (Facebook SDK)
         AppEventsLogger.activateApp(this);
 
         setUpMapIfNeeded();
@@ -299,28 +271,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         );
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        uiHelper.onActivityResult(requestCode, resultCode, data);
-    }
-
     //Stop listener when we are on pause
     @Override
     protected void onPause() {
         super.onPause();
-        uiHelper.onPause();
 
-        // Logs 'app deactivate' App Event.
+        // Logs 'app deactivate' App Event (Facebook SDK)
         AppEventsLogger.deactivateApp(this);
 
         locationManager.removeUpdates(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        uiHelper.onDestroy();
     }
 
     /**
@@ -508,8 +467,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             case 5:
                 fragment = new AlbumCreationFragment();
                 break;
-            case 7:
+            case 8:
                 Toast.makeText(getApplication(),"Log in",Toast.LENGTH_SHORT).show();
+                fragment = new Setting();
                 break;
             default:
                 return false;
@@ -561,14 +521,5 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         onBackPressed();
         AlbumDao.getInstance().create(album);
         //TODO refresh album list
-    }
-
-    // Callback for facebook session status
-    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-        if (state.isOpened()) {
-            Log.i(TAG, "Logged in...");
-        } else if (state.isClosed()) {
-            Log.i(TAG, "Logged out...");
-        }
     }
 }

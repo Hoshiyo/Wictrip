@@ -2,11 +2,15 @@ package com.darzul.hoshiyo.wictrip.entity;
 
 import com.darzul.hoshiyo.wictrip.GlobalVariable;
 
+import org.parceler.Parcel;
+import org.parceler.ParcelConstructor;
+
 import java.io.Serializable;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
  */
+@Parcel(Parcel.Serialization.METHOD)
 public class Place implements Serializable {
     int id = -1;
     private String countryName;
@@ -16,7 +20,7 @@ public class Place implements Serializable {
     private double lat;
     private double lng;
 
-
+    @ParcelConstructor
     public Place(int id, String countryName, String countryCode, String locality, String postalCode, double lat, double lng) {
         this.id = id;
         this.countryName = countryName;

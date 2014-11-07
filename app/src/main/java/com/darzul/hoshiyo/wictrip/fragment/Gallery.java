@@ -14,10 +14,12 @@ import android.widget.TextView;
 
 import com.darzul.hoshiyo.wictrip.GlobalVariable;
 import com.darzul.hoshiyo.wictrip.adapter.PictureGridViewAdapter;
-import com.example.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
 import com.darzul.hoshiyo.wictrip.entity.Picture;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +39,7 @@ public class Gallery extends Fragment {
     public static Gallery newInstance(Album album) {
         Gallery fragment = new Gallery();
         Bundle args = new Bundle();
-        args.putSerializable(GlobalVariable.ARG_ALBUM, album);
+        args.putParcelable(GlobalVariable.ARG_ALBUM, Parcels.wrap(album));
         fragment.setArguments(args);
         return fragment;
     }

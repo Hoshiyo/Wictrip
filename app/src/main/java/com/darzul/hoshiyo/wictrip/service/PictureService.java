@@ -33,19 +33,36 @@ public class PictureService extends Service {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         mGeocoder = new Geocoder(getApplicationContext());
-        try {
-            processUserPictures();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    if(computeUserPictures()) {
+                        //TODO getApplication().
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        return super.onStartCommand(intent, flags, startId);
     }
 
     /**
      * Reverse geocoding with all user pictures to get country, locality
      * Store the picture info into local db (date taken, uri and position)
+     * @return boolean to notify if Dao have to fetch data or not
      */
-    public void processUserPictures() throws IOException {
+    public boolean computeUserPictures() throws IOException {
+
+        // State to notify if there is new datas
+        boolean haveToRefresh = false;
 
         // Get user pictures
         Cursor cursors[] = new Cursor[2];
@@ -71,8 +88,7 @@ public class PictureService extends Service {
         PictureDao pictureDao = PictureDao.getInstance();
         Picture picture;
         String uri;
-        String countryName = null, countryCode = null, locality = null, postalCode = null;
-        LatLng position;
+        String countryName, countryCode = null, locality, postalCode = null;
         double lng, lat;
         long dateTaken;
         float dist;
@@ -87,8 +103,10 @@ public class PictureService extends Service {
         while (!mergeCursor.isAfterLast()) {
             uri = mergeCursor.getString(dataColumnId);
 
-            // Picture already present in the DB
+            // Picture is not in the DB
             if (!pictureDao.uriExist(uri)) {
+                haveToRefresh = true;
+
                 dateTaken = mergeCursor.getLong(dateTakenColumnId);
 
                 // Get lat and lng in the picture meta data
@@ -124,7 +142,14 @@ public class PictureService extends Service {
                                     break;
                             }
 
-                            placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, lat, lng));
+                            // Create country place if possible
+                            if(countryCode != null && countryName != null) {
+                                placeDao.create(new Place(-1, countryName, countryCode, null, null, lat, lng));
+                                // Create locality if we get locality and postal code
+                                if (postalCode != null && locality != null)
+                                    placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, lat, lng));
+                            }
+
                             Log.d(TAG, "Geolocalisable - country: " + countryCode + " Postal code: " + postalCode);
                         }
                         // Request to reverse geocoding has a limit time per sec
@@ -155,6 +180,8 @@ public class PictureService extends Service {
         cursors[0].close();
         cursors[1].close();
         mergeCursor.close();
+
+        return haveToRefresh;
     }
 
     @Override

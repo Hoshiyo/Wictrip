@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darzul.hoshiyo.wictrip.DatabaseHelper;
-import com.example.hoshiyo.wictrip.R;
+import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.dao.PlaceDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 28/10/2014.
@@ -136,7 +137,7 @@ public class AlbumCreationFragment extends Fragment {
                 }
 
                 Place albumPlace = (Place) mPlaceSpinner.getSelectedItem();
-                Collection<Picture> albumPictures = getFilteredPictures(albumPlace, timeBegin, timeEnd);
+                List<Picture> albumPictures = (List<Picture>) getFilteredPictures(albumPlace, timeBegin, timeEnd);
 
                 if (albumPictures != null) {
                     Log.d(TAG, albumPictures.size() + " picture(s) into the new Album");

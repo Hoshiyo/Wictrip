@@ -214,6 +214,11 @@ public class PlaceDao implements IDao {
         return false;
     }
 
+    @Override
+    public void refreshData() {
+        fetchAll();
+    }
+
     private Place cursorToPlace(Cursor cursor) {
         int id = cursor.getInt(0);
         String countryName = cursor.getString(1);
