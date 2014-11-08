@@ -1,22 +1,21 @@
 package com.darzul.hoshiyo.wictrip.service;
 
-import android.app.Service;
-import android.content.Intent;
+import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.darzul.hoshiyo.wictrip.activity.MapsActivity;
 import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.dao.PlaceDao;
 import com.darzul.hoshiyo.wictrip.entity.Picture;
 import com.darzul.hoshiyo.wictrip.entity.Place;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,39 +23,42 @@ import java.util.List;
 /**
  * Created by Guillaume 'DarzuL' Bourderye on 30/10/2014.
  */
-public class PictureService extends Service {
+public class PictureReverseGeocoding {
 
     private static final String TAG = "Picture service";
     private static final long GEOCODER_LIMIT_TIME_PER_SEC = 200;
 
     private Geocoder mGeocoder = null;
+    private MapsActivity mActivity;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mGeocoder = new Geocoder(getApplicationContext());
+    public PictureReverseGeocoding(MapsActivity activity) {
+        mGeocoder = new Geocoder(activity);
+        mActivity = activity;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void start() {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    if(computeUserPictures()) {
-                        //TODO getApplication().
+                    if (computeUserPictures()) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mActivity.refreshData();
+                            }
+                        });
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
-
-        return super.onStartCommand(intent, flags, startId);
     }
 
     /**
      * Reverse geocoding with all user pictures to get country, locality
      * Store the picture info into local db (date taken, uri and position)
+     *
      * @return boolean to notify if Dao have to fetch data or not
      */
     public boolean computeUserPictures() throws IOException {
@@ -68,11 +70,11 @@ public class PictureService extends Service {
         Cursor cursors[] = new Cursor[2];
 
         // from SD card
-        cursors[0] = this.getApplication().getContentResolver().query(
+        cursors[0] = mActivity.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null,
                 null);
         // and from intern memory
-        cursors[1] = getApplication().getContentResolver().query(
+        cursors[1] = mActivity.getContentResolver().query(
                 MediaStore.Images.Media.INTERNAL_CONTENT_URI, null, null, null,
                 null);
 
@@ -143,11 +145,11 @@ public class PictureService extends Service {
                             }
 
                             // Create country place if possible
-                            if(countryCode != null && countryName != null) {
-                                placeDao.create(new Place(-1, countryName, countryCode, null, null, lat, lng));
+                            if (countryCode != null && countryName != null) {
+                                placeDao.create(new Place(-1, countryName, countryCode, null, null, lat, lng, true));
                                 // Create locality if we get locality and postal code
                                 if (postalCode != null && locality != null)
-                                    placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, lat, lng));
+                                    placeDao.create(new Place(-1, countryName, countryCode, locality, postalCode, lat, lng, true));
                             }
 
                             Log.d(TAG, "Geolocalisable - country: " + countryCode + " Postal code: " + postalCode);
@@ -182,10 +184,5 @@ public class PictureService extends Service {
         mergeCursor.close();
 
         return haveToRefresh;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 }

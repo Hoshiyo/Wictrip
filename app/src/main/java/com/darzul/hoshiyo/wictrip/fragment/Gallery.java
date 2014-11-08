@@ -19,7 +19,6 @@ import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
 import com.darzul.hoshiyo.wictrip.entity.Picture;
 
-import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +38,7 @@ public class Gallery extends Fragment {
     public static Gallery newInstance(Album album) {
         Gallery fragment = new Gallery();
         Bundle args = new Bundle();
-        args.putParcelable(GlobalVariable.ARG_ALBUM, Parcels.wrap(album));
+        args.putSerializable(GlobalVariable.ARG_ALBUM, album);
         fragment.setArguments(args);
         return fragment;
     }
@@ -105,6 +104,8 @@ public class Gallery extends Fragment {
             }
         });
 
+        actionBar.show();
+
         return v;
     }
 
@@ -131,6 +132,12 @@ public class Gallery extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mListener.onGalleryDestroyed();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -148,5 +155,6 @@ public class Gallery extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         public void onGalleryValidated();
+        public void onGalleryDestroyed();
     }
 }

@@ -4,4 +4,5 @@
     <color name="menu_item_bg">#000</color>
     <color name="menu_item_bg_pressed">#FFF</color>
     <color name="picture_selected">#3eceff</color>
+    <color name="fgt_bg">#FFF</color>
 </resources>

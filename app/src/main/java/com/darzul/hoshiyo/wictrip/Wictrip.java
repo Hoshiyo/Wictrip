@@ -11,7 +11,6 @@ import android.view.WindowManager;
 import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
 import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.dao.PlaceDao;
-import com.darzul.hoshiyo.wictrip.service.PictureService;
 
 import java.sql.SQLException;
 
@@ -45,8 +44,5 @@ public class Wictrip extends Application {
 
         // Set picture size for gallery
         GlobalVariable.PICTURE_SIZE = width/2;
-
-        // Start picture service to process user pictures
-        startService(new Intent(this, PictureService.class));
     }
 }

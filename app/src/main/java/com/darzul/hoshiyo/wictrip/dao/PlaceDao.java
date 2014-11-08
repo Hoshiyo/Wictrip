@@ -30,9 +30,11 @@ public class PlaceDao implements IDao {
     public static final String COLUMN_POSTAL_CODE = "postal_code";
     public static final String COLUMN_LAT = "lat"; // Latitude
     public static final String COLUMN_LNG = "lng"; // Longitude
+    private static final String COLUMN_VISITED = "visited";
+
     public static final String[] allColumns = {COLUMN_ID, COLUMN_COUNTRY_NAME,
             COLUMN_COUNTRY_CODE, COLUMN_LOCALITY, COLUMN_POSTAL_CODE,
-            COLUMN_LAT, COLUMN_LNG};
+            COLUMN_LAT, COLUMN_LNG, COLUMN_VISITED};
     private static final String TABLE_CREATION = "create table " + TABLE_NAME
             + "(" + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_COUNTRY_NAME + " text not null, "
@@ -40,7 +42,8 @@ public class PlaceDao implements IDao {
             + COLUMN_LOCALITY + " text, "
             + COLUMN_POSTAL_CODE + " text, "
             + COLUMN_LNG + " real, "
-            + COLUMN_LAT + " real)";
+            + COLUMN_LAT + " real,"
+            + COLUMN_VISITED + " integer)";
 
     private static PlaceDao ourInstance = new PlaceDao();
 
@@ -199,8 +202,6 @@ public class PlaceDao implements IDao {
             Log.d(TAG, "1 -> " + argsValue[0] + " 2 -> " + argsValue[1]);
         }
 
-        Log.d(TAG, "locality: " + postalCode);
-        Log.d(TAG, "Query: " + query);
         String[] columns = {COLUMN_ID};
         Cursor cursor = db.query(TABLE_NAME, columns, query, argsValue, null, null, null);
 
@@ -227,8 +228,9 @@ public class PlaceDao implements IDao {
         String postalCode = cursor.getString(4);
         double lat = cursor.getDouble(5);
         double lng = cursor.getDouble(6);
+        boolean visited = (cursor.getInt(7) == 1) ? true:false;
 
-        return new Place(id, countryName, countryCode, locality, postalCode, lat, lng);
+        return new Place(id, countryName, countryCode, locality, postalCode, lat, lng, visited);
     }
 
     private ContentValues placeToContentValues(Place place) {
@@ -240,6 +242,7 @@ public class PlaceDao implements IDao {
         values.put(COLUMN_POSTAL_CODE, place.getPostalCode());
         values.put(COLUMN_LAT, place.getLat());
         values.put(COLUMN_LNG, place.getLng());
+        values.put(COLUMN_VISITED, (place.isVisited()) ? 1:0);
 
         return values;
     }

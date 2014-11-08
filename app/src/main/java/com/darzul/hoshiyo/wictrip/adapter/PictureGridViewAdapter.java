@@ -35,7 +35,6 @@ public class PictureGridViewAdapter extends BaseAdapter {
         mPictures = new ArrayList<Picture>(pictures);
         mPicturesSelected = new ArrayList<Picture>();
         picasso = Picasso.with(mContext);
-        picasso.setIndicatorsEnabled(true);
     }
 
     @Override

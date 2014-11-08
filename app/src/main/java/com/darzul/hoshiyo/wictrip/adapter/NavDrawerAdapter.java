@@ -12,17 +12,18 @@ import com.darzul.hoshiyo.wictrip.NavDrawerChild;
 import com.darzul.hoshiyo.wictrip.NavDrawerGroup;
 import com.darzul.hoshiyo.wictrip.R;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MyAdapter extends BaseExpandableListAdapter {
+public class NavDrawerAdapter extends BaseExpandableListAdapter {
 
     private Context mContext;
     private List<NavDrawerGroup> navDrawerGroups;
 
-    public MyAdapter(Context context, List<NavDrawerGroup> navDrawerGroups) {
+    public NavDrawerAdapter(Context context, List<NavDrawerGroup> navDrawerGroups) {
         this.mContext = context;
-        this.navDrawerGroups = navDrawerGroups;
+        this.navDrawerGroups = new ArrayList<NavDrawerGroup>(navDrawerGroups);
     }
 
     @Override
@@ -58,10 +59,13 @@ public class MyAdapter extends BaseExpandableListAdapter {
         int icoRes = navDrawerChild.getIcoRight();
         if(icoRes == -1) {
             //TODO cas pas d'icone
-            icoRight.setVisibility(View.GONE);
+            icoRight.setAlpha((float) 0);
         } else {
+            icoRight.setAlpha((float) 1);
             icoRight.setImageResource(icoRes);
         }
+
+        v.setOnClickListener(navDrawerChild.getListener());
 
         return v;
     }
@@ -108,8 +112,9 @@ public class MyAdapter extends BaseExpandableListAdapter {
         int icoRes = navDrawerGroup.getIconLeft();
         if(icoRes == -1) {
             //TODO cas pas d'image
-            ico.setVisibility(View.GONE);
+            ico.setAlpha((float) 0);
         } else {
+            ico.setAlpha((float) 1);
             ico.setImageResource(icoRes);
         }
 
@@ -131,5 +136,10 @@ public class MyAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    public void setList(List<NavDrawerGroup> navDrawerGroups) {
+        this.navDrawerGroups = new ArrayList<NavDrawerGroup>(navDrawerGroups);
+        notifyDataSetChanged();
     }
 }

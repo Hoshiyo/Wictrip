@@ -1,13 +1,13 @@
 package com.darzul.hoshiyo.wictrip.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,16 +26,19 @@ import android.widget.Toast;
 import com.darzul.hoshiyo.wictrip.GlobalVariable;
 import com.darzul.hoshiyo.wictrip.NavDrawerChild;
 import com.darzul.hoshiyo.wictrip.NavDrawerGroup;
-import com.darzul.hoshiyo.wictrip.adapter.MyAdapter;
+import com.darzul.hoshiyo.wictrip.adapter.NavDrawerAdapter;
 import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
+import com.darzul.hoshiyo.wictrip.dao.PictureDao;
 import com.darzul.hoshiyo.wictrip.dao.PlaceDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
+import com.darzul.hoshiyo.wictrip.entity.Picture;
 import com.darzul.hoshiyo.wictrip.entity.Place;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumCreationFragment;
 import com.darzul.hoshiyo.wictrip.fragment.AlbumPictures;
 import com.darzul.hoshiyo.wictrip.fragment.Gallery;
 import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.fragment.Setting;
+import com.darzul.hoshiyo.wictrip.service.PictureReverseGeocoding;
 import com.facebook.AppEventsLogger;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,7 +54,8 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements LocationListener,
         AlbumPictures.OnFragmentInteractionListener,
         Gallery.OnFragmentInteractionListener,
-        AlbumCreationFragment.OnFragmentInteractionListener {
+        AlbumCreationFragment.OnFragmentInteractionListener,
+        Setting.OnFragmentInteractionListener {
 
     private static final long TIME_BETWEEN_TWO_POINTS = 50000;
     private static final float DISTANCE_BETWEEN_TWO_POINTS = 3000;
@@ -74,7 +78,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private String[] navMenuItemName = null;
 
     DrawerLayout mDrawerLayout;
-    ExpandableListAdapter mAdapter;
+    NavDrawerAdapter mAdapter;
     ExpandableListView mDrawerList;
     ArrayList<NavDrawerGroup> listDataHeader;
 
@@ -84,7 +88,12 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Launch "service"
+        PictureReverseGeocoding service = new PictureReverseGeocoding(this);
+        service.start();
+
         setContentView(R.layout.activity_maps);
+        getActionBar().hide();
 
         //load map
         setUpMapIfNeeded();
@@ -139,6 +148,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private void setSubItemData() {
         listDataHeader = new ArrayList<NavDrawerGroup>();
         List<NavDrawerChild> children = null;
+        View.OnClickListener listener;
 
         Collection<Object> places = PlaceDao.getInstance().getAll();
         Place place;
@@ -154,7 +164,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         children = new ArrayList<NavDrawerChild>();
         for(Object obj : places) {
             place = (Place) obj;
-            children.add(new NavDrawerChild(place.toString(), R.drawable.ic_menu_add, -1));
+            children.add(new NavDrawerChild(place.toString(),
+                    place.isVisited() ? R.drawable.ic_pastille_red : R.drawable.ic_pastille_blue,
+                    -1, null));
         }
         listDataHeader.add(new NavDrawerGroup(navMenuItemName[3], -1, children));
         listDataHeader.add(new NavDrawerGroup(navMenuItemName[4], -1, null));
@@ -163,7 +175,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         children = new ArrayList<NavDrawerChild>();
         for(Object obj : albums) {
             album = (Album) obj;
-            children.add(new NavDrawerChild(album.toString(), R.drawable.ic_pastille_red, -1));
+            final Album finalAlbum = album;
+            // Listener to display an album
+            listener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .add(R.id.content_field, AlbumPictures.newInstance(finalAlbum), GlobalVariable.FRAG_ALBUM)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            };
+            children.add(new NavDrawerChild(album.toString(), R.drawable.ic_show, -1, listener));
         }
 
         listDataHeader.add(new NavDrawerGroup(navMenuItemName[6], -1, children));
@@ -191,7 +215,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         setSubItemData();
 
-        mAdapter = new MyAdapter(this, listDataHeader);
+        mAdapter = new NavDrawerAdapter(this, listDataHeader);
         mDrawerList.setAdapter(mAdapter);
     }
 
@@ -321,6 +345,26 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        //TODO
+    }
+
+    //TODO A REVVOIR !!!
+    public void refreshData() {
+        //TODO
+        // Refresh Dao datas
+        PictureDao.getInstance().refreshData();
+        PlaceDao.getInstance().refreshData();
+        AlbumDao.getInstance().refreshData();
+
+        setSubItemData();
+        mAdapter.setList(listDataHeader);
+
+        // TODO Refresh fgt
+
+    }
+
     // An AsyncTask class for accessing the GeoCoding Web Service
     private class GeocoderTask extends AsyncTask<String, Void, List<Address>> {
 
@@ -411,7 +455,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 break;
 
             case 8:
-                Toast.makeText(getApplication(),"Log in",Toast.LENGTH_SHORT).show();
                 fragment = new Setting();
                 break;
             default:
@@ -442,13 +485,17 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         Fragment fragment = Gallery.newInstance(album);
         getSupportFragmentManager()
                 .beginTransaction().addToBackStack(null)
-                .add(R.id.container, fragment, GlobalVariable.FRAG_GALLERY)
+                .add(R.id.content_field, fragment, GlobalVariable.FRAG_GALLERY)
                 .commit();
     }
 
     @Override
     public void onGalleryValidated() {
         onBackPressed();
+    }
+
+    @Override
+    public void onGalleryDestroyed() {
         Fragment fragment = getSupportFragmentManager()
                 .findFragmentByTag(GlobalVariable.FRAG_ALBUM);
         if(fragment != null) {
@@ -463,6 +510,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void onCreateAlbum(Album album) {
         onBackPressed();
         AlbumDao.getInstance().create(album);
-        //TODO refresh album list
+
+        // TODO A REVOIR !!!
+        refreshData();
     }
 }

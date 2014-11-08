@@ -76,6 +76,7 @@
         android:choiceMode="singleChoice"
         android:divider="@android:color/white"
         android:dividerHeight="1dp"
-        android:background="#333"/>
+        android:background="#333"
+        android:groupIndicator="@color/transparency"/>
 
 </android.support.v4.widget.DrawerLayout>

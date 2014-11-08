@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,8 +21,6 @@ import com.darzul.hoshiyo.wictrip.R;
 import com.darzul.hoshiyo.wictrip.dao.AlbumDao;
 import com.darzul.hoshiyo.wictrip.entity.Album;
 import com.darzul.hoshiyo.wictrip.entity.Picture;
-
-import org.parceler.Parcels;
 
 import java.util.Collection;
 
@@ -52,7 +49,7 @@ public class AlbumPictures extends Fragment {
     public static AlbumPictures newInstance(Album album) {
         AlbumPictures fragment = new AlbumPictures();
         Bundle args = new Bundle();
-        args.putParcelable(GlobalVariable.ARG_ALBUM, Parcels.wrap(album));
+        args.putSerializable(GlobalVariable.ARG_ALBUM, album);
         fragment.setArguments(args);
         return fragment;
     }
@@ -148,6 +145,8 @@ public class AlbumPictures extends Fragment {
                 }
             }
         });
+
+        actionBar.show();
     }
 
     @Override
@@ -159,6 +158,13 @@ public class AlbumPictures extends Fragment {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //TODO Créer une methode dans l'interface
+        getActivity().getActionBar().hide();
     }
 
     @Override
